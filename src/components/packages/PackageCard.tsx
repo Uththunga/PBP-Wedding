@@ -36,9 +36,10 @@ export default function PackageCard({ package: pkg, onBook, index }: PackageCard
 
         <button
           onClick={onBook}
-          className="w-full py-3 px-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 text-sm font-medium"
+          className="w-full relative overflow-hidden py-3 px-4 bg-transparent border-2 border-brand-primary text-brand-primary rounded-full font-medium hover:text-white transition-colors group"
         >
-          Book Now
+          <span className="relative z-10">Book Now</span>
+          <div className="absolute inset-0 bg-brand-primary transform -translate-x-full transition-transform duration-300 ease-out group-hover:translate-x-0" />
         </button>
       </div>
     </motion.div>

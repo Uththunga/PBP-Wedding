@@ -4,26 +4,20 @@ import { branding } from '../../config/branding';
 import logoImage from '../icons/logo.png';
 
 interface LogoProps {
-  variant?: 'full' | 'minimal';
+  variant?: 'light' | 'dark';
   className?: string;
 }
 
-export default function Logo({ variant = 'full', className = '' }: LogoProps) {
+export default function Logo({ variant = 'light', className = '' }: LogoProps) {
   return (
-    <Link 
-      to="/" 
-      className={`flex items-center ${className}`}
-    >
+    <div className={`flex items-center ${className}`}>
       <img 
         src={logoImage} 
         alt={branding.name}
-        className="h-8 w-auto object-contain" 
+        className={`h-8 w-auto object-contain transition-colors ${
+          variant === 'dark' ? 'filter brightness-0' : 'filter brightness-0 invert'
+        }`}
       />
-      {variant === 'full' && (
-        <span className="ml-3 font-serif text-lg tracking-wide font-medium text-brand-dark">
-          {variant === 'full' ? branding.name : branding.shortName}
-        </span>
-      )}
-    </Link>
+    </div>
   );
 }

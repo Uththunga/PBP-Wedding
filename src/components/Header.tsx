@@ -26,8 +26,9 @@ export default function Header() {
             <Link to="/packages" className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900">
               Packages
             </Link>
-            <Link to="/booking" className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900">
-              Book Now
+            <Link to="/booking" className="relative overflow-hidden px-4 py-2 rounded-full font-medium text-brand-primary border-2 border-brand-primary hover:text-white group">
+              <span className="relative z-10">Book a Session</span>
+              <div className="absolute inset-0 bg-brand-primary transform -translate-x-full transition-transform duration-300 ease-out group-hover:translate-x-0" />
             </Link>
             <Link to="/admin" className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 hover:text-gray-900">
               Admin

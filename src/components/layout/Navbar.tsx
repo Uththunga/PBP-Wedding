@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, UserCircle2, Instagram, Facebook } from 'lucide-react';
+import { Menu, X, User, Instagram, Facebook } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { branding } from '../../config/branding';
 import Logo from './Logo';
@@ -27,6 +27,10 @@ export default function Navbar() {
     setIsMenuOpen(false);
   }, [location]);
 
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <>
       <motion.nav
@@ -36,7 +40,7 @@ export default function Navbar() {
           isScrolled ? 'bg-white shadow-lg' : 'bg-transparent'
         }`}
       >
-        <div className="max-w-screen-2xl mx-auto px-6 py-4">
+        <div className="max-w-screen-2xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             {/* Menu Button */}
             <motion.button
@@ -77,37 +81,20 @@ export default function Navbar() {
               animate={{ opacity: 1 }}
               className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
             >
-              <Link to="/">
-                <Logo variant={isScrolled ? 'dark' : 'light'} />
+              <Link 
+                to="/" 
+                onClick={scrollToTop} 
+                className="block transition-all duration-300"
+              >
+                <Logo 
+                  variant={isScrolled ? 'dark' : 'light'} 
+                  className="transition-all duration-300" 
+                />
               </Link>
             </motion.div>
 
             {/* Right Side Icons */}
-            <div className="flex items-center space-x-6">
-              <motion.a
-                href={branding.social.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                className={`transition-colors ${
-                  isScrolled ? 'text-brand-dark hover:text-brand-primary' : 'text-white hover:text-brand-beige'
-                }`}
-              >
-                <Instagram className="w-5 h-5" />
-              </motion.a>
-              <motion.a
-                href={branding.social.facebook}
-                target="_blank"
-                rel="noopener noreferrer"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                className={`transition-colors ${
-                  isScrolled ? 'text-brand-dark hover:text-brand-primary' : 'text-white hover:text-brand-beige'
-                }`}
-              >
-                <Facebook className="w-5 h-5" />
-              </motion.a>
+            <div className="flex items-center space-x-4">
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
@@ -116,38 +103,41 @@ export default function Navbar() {
                   isScrolled ? 'text-brand-dark hover:text-brand-primary' : 'text-white hover:text-brand-beige'
                 }`}
               >
-                <UserCircle2 className="w-6 h-6" />
+                <User className="w-5 h-5" />
               </motion.button>
             </div>
           </div>
         </div>
-      </motion.nav>
 
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, x: -300 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -300 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-            className="fixed inset-0 z-40 bg-brand-dark"
-          >
-            <div className="flex flex-col h-full pt-24 px-6">
-              <NavLinks
-                className="flex flex-col space-y-6 text-center"
-                linkClassName="text-brand-beige hover:text-brand-primary text-2xl font-serif transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              />
-              <div className="mt-auto pb-8">
-                <div className="flex justify-center space-x-8 mb-6">
+        {/* Full Screen Menu */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-brand-beige z-40"
+            >
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="flex flex-col items-center justify-center min-h-screen px-6 py-24"
+              >
+                <NavLinks
+                  className="space-y-8 text-center"
+                  onClick={() => setIsMenuOpen(false)}
+                  linkClassName="text-3xl font-serif text-brand-dark hover:text-brand-muted transition-colors duration-200"
+                />
+                <div className="mt-12 flex items-center space-x-8">
                   <motion.a
                     href={branding.social.instagram}
                     target="_blank"
                     rel="noopener noreferrer"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
-                    className="text-brand-beige hover:text-brand-primary transition-colors"
+                    className="text-brand-dark hover:text-brand-muted transition-colors"
                   >
                     <Instagram className="w-6 h-6" />
                   </motion.a>
@@ -157,19 +147,27 @@ export default function Navbar() {
                     rel="noopener noreferrer"
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
-                    className="text-brand-beige hover:text-brand-primary transition-colors"
+                    className="text-brand-dark hover:text-brand-muted transition-colors"
                   >
                     <Facebook className="w-6 h-6" />
                   </motion.a>
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      setIsLoginModalOpen(true);
+                    }}
+                    className="text-brand-dark hover:text-brand-muted transition-colors"
+                  >
+                    <User className="w-6 h-6" />
+                  </motion.button>
                 </div>
-                <p className="text-brand-beige/60 text-center text-sm">
-                  {new Date().getFullYear()} {branding.name}
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.nav>
 
       <LoginModal 
         isOpen={isLoginModalOpen}

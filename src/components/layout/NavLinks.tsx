@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { scrollToTop } from '../../utils/scrollUtils';
 
 interface NavLink {
   path: string;
@@ -10,8 +11,9 @@ interface NavLink {
 const links: NavLink[] = [
   { path: '/', label: 'Home' },
   { path: '/gallery', label: 'Gallery' },
-  { path: '/packages', label: 'Services' },
-  { path: '/booking', label: 'Book' },
+  { path: '/booking', label: 'Book a Session' },
+  { path: '/about', label: 'About' },
+  { path: '/contact', label: 'Contact' },
 ];
 
 interface NavLinksProps {
@@ -21,6 +23,11 @@ interface NavLinksProps {
 }
 
 export default function NavLinks({ className = '', linkClassName = '', onClick }: NavLinksProps) {
+  const handleClick = () => {
+    scrollToTop();
+    if (onClick) onClick();
+  };
+
   return (
     <div className={className}>
       {links.map((link, index) => (
@@ -32,7 +39,7 @@ export default function NavLinks({ className = '', linkClassName = '', onClick }
         >
           <Link
             to={link.path}
-            onClick={onClick}
+            onClick={handleClick}
             className={`block text-brand-beige font-serif hover:text-brand-muted transition-colors duration-200 ${linkClassName}`}
           >
             {link.label}
