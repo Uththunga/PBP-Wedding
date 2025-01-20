@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, User, Instagram, Facebook } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Menu, X, User, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { branding } from '../../config/branding';
+import { useAuthStore } from '../../store/authStore';
 import Logo from './Logo';
 import NavLinks from './NavLinks';
 import MobileMenu from './MobileMenu';
@@ -13,6 +14,8 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { isAuthenticated, logout, user } = useAuthStore();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -29,6 +32,11 @@ export default function Navbar() {
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
   };
 
   return (
@@ -95,83 +103,73 @@ export default function Navbar() {
 
             {/* Right Side Icons */}
             <div className="flex items-center space-x-4">
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => setIsLoginModalOpen(true)}
-                className={`transition-colors ${
-                  isScrolled ? 'text-brand-dark hover:text-brand-primary' : 'text-white hover:text-brand-beige'
-                }`}
-              >
-                <User className="w-5 h-5" />
-              </motion.button>
-            </div>
-          </div>
-        </div>
-
-        {/* Full Screen Menu */}
-        <AnimatePresence>
-          {isMenuOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-brand-beige z-40"
-            >
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="flex flex-col items-center justify-center min-h-screen px-6 py-24"
-              >
-                <NavLinks
-                  className="space-y-8 text-center"
-                  onClick={() => setIsMenuOpen(false)}
-                  linkClassName="text-3xl font-serif text-brand-dark hover:text-brand-muted transition-colors duration-200"
-                />
-                <div className="mt-12 flex items-center space-x-8">
-                  <motion.a
-                    href={branding.social.instagram}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    className="text-brand-dark hover:text-brand-muted transition-colors"
+              {isAuthenticated ? (
+                <div className="flex items-center space-x-4">
+                  <motion.div
+                    whileHover={{ scale: 1.05 }}
+                    className={`flex items-center space-x-2 ${
+                      isScrolled ? 'text-brand-dark' : 'text-white'
+                    }`}
                   >
-                    <Instagram className="w-6 h-6" />
-                  </motion.a>
-                  <motion.a
-                    href={branding.social.facebook}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
-                    className="text-brand-dark hover:text-brand-muted transition-colors"
-                  >
-                    <Facebook className="w-6 h-6" />
-                  </motion.a>
+                    <User className="w-5 h-5" />
+                    <span className="text-sm font-medium hidden sm:inline">
+                      {user?.name}
+                    </span>
+                  </motion.div>
                   <motion.button
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.9 }}
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      setIsLoginModalOpen(true);
-                    }}
-                    className="text-brand-dark hover:text-brand-muted transition-colors"
+                    onClick={handleLogout}
+                    className={`flex items-center space-x-2 transition-colors ${
+                      isScrolled 
+                        ? 'text-brand-dark hover:text-brand-primary' 
+                        : 'text-white hover:text-brand-beige'
+                    }`}
+                    aria-label="Logout"
                   >
-                    <User className="w-6 h-6" />
+                    <LogOut className="w-5 h-5" />
+                    <span className="text-sm font-medium hidden sm:inline">
+                      Logout
+                    </span>
                   </motion.button>
                 </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              ) : (
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => setIsLoginModalOpen(true)}
+                  className={`flex items-center space-x-2 transition-colors ${
+                    isScrolled 
+                      ? 'text-brand-dark hover:text-brand-primary' 
+                      : 'text-white hover:text-brand-beige'
+                  }`}
+                  aria-label="Login"
+                >
+                  <User className="w-5 h-5" />
+                  <span className="text-sm font-medium hidden sm:inline">
+                    Login
+                  </span>
+                </motion.button>
+              )}
+            </div>
+          </div>
+        </div>
       </motion.nav>
 
+      {/* Mobile Menu */}
+      <MobileMenu 
+        isOpen={isMenuOpen} 
+        onClose={() => setIsMenuOpen(false)} 
+        onLoginClick={() => {
+          setIsMenuOpen(false);
+          setIsLoginModalOpen(true);
+        }} 
+      />
+
+      {/* Login Modal */}
       <LoginModal 
-        isOpen={isLoginModalOpen}
-        onClose={() => setIsLoginModalOpen(false)}
+        isOpen={isLoginModalOpen} 
+        onClose={() => setIsLoginModalOpen(false)} 
       />
     </>
   );

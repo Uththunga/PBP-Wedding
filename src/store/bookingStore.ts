@@ -16,6 +16,7 @@ export const useBookingStore = create<BookingStore>((set) => ({
     {
       id: 'wedding-premium',
       name: 'Premium Wedding',
+      category: 'Wedding',
       description: 'Complete wedding day coverage with luxury extras',
       features: [
         'Full day coverage (10 hours)',
@@ -33,6 +34,7 @@ export const useBookingStore = create<BookingStore>((set) => ({
     {
       id: 'wedding-essential',
       name: 'Wedding Essentials',
+      category: 'Wedding',
       description: 'Perfect coverage for intimate weddings',
       features: [
         '8 hours of coverage',
@@ -47,67 +49,132 @@ export const useBookingStore = create<BookingStore>((set) => ({
       ]
     },
     {
-      id: 'portrait-family',
-      name: 'Family Portrait',
-      description: 'Capture precious family moments',
+      id: 'fashion-editorial',
+      name: 'Editorial Fashion',
+      category: 'Fashion',
+      description: 'High-end fashion and editorial photography',
       features: [
-        '90-minute session',
-        'Multiple locations',
-        '30 edited digital images',
-        'Print release',
-        'Online gallery',
-        'Mini photo album',
-        'Professional editing',
-        'Multiple poses and groupings',
-        'Location recommendations'
-      ]
-    },
-    {
-      id: 'portrait-personal',
-      name: 'Personal Branding',
-      description: 'Professional headshots and personal branding',
-      features: [
-        '60-minute session',
+        'Professional styling consultation',
+        'Hair and makeup included',
+        'Studio and location shoots',
+        'High-end retouching',
+        'Digital and print deliverables',
+        'Usage rights included',
         'Multiple outfit changes',
-        '20 edited photos',
-        'LinkedIn optimization',
-        'Quick turnaround',
-        'Commercial usage rights',
+        'Lighting setup and equipment',
+        'Professional team coordination'
+      ]
+    },
+    {
+      id: 'fashion-portfolio',
+      name: 'Portfolio Builder',
+      category: 'Fashion',
+      description: 'Perfect for models and influencers',
+      features: [
+        'Studio session (4 hours)',
+        'Basic styling included',
+        'Multiple looks',
         'Professional retouching',
-        'Personal style consultation',
-        'Digital delivery'
+        'Digital gallery',
+        'Print release',
+        'Social media formats',
+        'Basic hair and makeup'
       ]
     },
     {
-      id: 'event-corporate',
-      name: 'Corporate Events',
-      description: 'Professional coverage for business events',
+      id: 'family-standard',
+      name: 'Family Session',
+      category: 'Family',
+      description: 'Capture your family\'s precious moments',
       features: [
-        '6 hours of coverage',
-        'Multiple photographers',
-        'Same-day preview images',
-        'Corporate branding focus',
-        'Quick digital delivery',
+        '1-hour session',
+        'Up to 6 family members',
+        'Choice of location',
+        'Online gallery',
+        '20 digital images',
+        'Print release',
+        'Basic retouching',
+        'Multiple poses and groupings'
+      ]
+    },
+    {
+      id: 'family-extended',
+      name: 'Extended Family',
+      category: 'Family',
+      description: 'Perfect for larger family gatherings',
+      features: [
+        '2-hour session',
+        'Up to 12 family members',
+        'Multiple locations',
+        'Online gallery',
+        '40 digital images',
+        'Print release',
+        'Professional retouching',
+        'Family grouping consultation'
+      ]
+    },
+    {
+      id: 'portrait-professional',
+      name: 'Professional Portrait',
+      category: 'Portrait',
+      description: 'Professional headshots and portraits',
+      features: [
+        'Studio session',
+        'Professional lighting',
+        'Multiple backgrounds',
+        'Outfit changes',
+        'Basic retouching',
+        'Digital delivery',
+        'LinkedIn/social media formats',
+        'Usage rights included'
+      ]
+    },
+    {
+      id: 'portrait-creative',
+      name: 'Creative Portrait',
+      category: 'Portrait',
+      description: 'Artistic and unique portrait session',
+      features: [
+        'Location or studio',
+        'Creative lighting',
+        'Concept development',
+        'Props and styling',
+        'Advanced retouching',
+        'Digital and print options',
+        'Artistic effects',
+        'Personal consultation'
+      ]
+    },
+    {
+      id: 'commercial-product',
+      name: 'Product Photography',
+      category: 'Commercial',
+      description: 'Professional product photography',
+      features: [
+        'Studio setup',
+        'Multiple angles',
+        'White background',
+        'Lifestyle shots',
+        'Basic retouching',
+        'E-commerce ready',
         'Commercial usage rights',
-        'Event timeline planning',
-        'Professional editing',
-        'High-resolution images'
+        'Quick turnaround'
       ]
     },
     {
-      id: 'event-special',
-      name: 'Special Occasions',
-      description: 'Birthday parties, anniversaries & celebrations',
+      id: 'commercial-corporate',
+      name: 'Corporate Event',
+      category: 'Commercial',
+      description: 'Corporate event and branding photography',
       features: [
-        '4 hours of coverage',
-        'Candid and posed shots',
-        'Online gallery sharing',
-        'Photo booth setup',
-        'Digital downloads',
-        'Print package included',
-        'Event consultation',
-        'Professional editing',
-        'Quick turnaround'
+        'Full event coverage',
+        'Corporate headshots',
+        'Venue and detail shots',
+        'Same-day previews',
+        'Online gallery',
+        'Commercial usage rights',
+        'Quick delivery',
+        'Professional editing'
       ]
     }
   ],

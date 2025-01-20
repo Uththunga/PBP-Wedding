@@ -1,14 +1,19 @@
-import React from 'react';
-import LoginForm from '../../components/auth/LoginForm';
+import React, { useState } from 'react';
+import LoginModal from '../../components/auth/LoginModal';
+import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
+  const [isModalOpen, setIsModalOpen] = useState(true);
+  const navigate = useNavigate();
+
+  const handleClose = () => {
+    setIsModalOpen(false);
+    navigate('/');
+  };
+
   return (
-    <div className="min-h-screen bg-brand-dark pt-24">
-      <div className="max-w-7xl mx-auto px-6 py-12">
-        <div className="flex min-h-[60vh] items-center justify-center">
-          <LoginForm />
-        </div>
-      </div>
+    <div className="min-h-screen bg-brand-beige">
+      <LoginModal isOpen={isModalOpen} onClose={handleClose} />
     </div>
   );
 }

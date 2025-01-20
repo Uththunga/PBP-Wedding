@@ -2,8 +2,8 @@ export type Package = {
   id: string;
   name: string;
   description: string;
-  price: number;
   features: string[];
+  category?: string;
 };
 
 export type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';

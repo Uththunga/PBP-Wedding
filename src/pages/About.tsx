@@ -48,23 +48,23 @@ export default function About() {
 
   return (
     <PageTransition>
-      <div className="min-h-screen bg-brand-beige">
+      <div className="min-h-screen bg-gradient-to-b from-brand-beige/20 to-white">
         {/* Hero Section */}
-        <div className="relative h-[70vh]">
+        <div className="relative h-[40vh] overflow-hidden">
           <div className="absolute inset-0">
             <img
               src="https://images.pexels.com/photos/3379934/pexels-photo-3379934.jpeg?auto=compress&cs=tinysrgb&w=1920"
               alt="Studio photography"
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/50 to-brand-dark/30" />
+            <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/60 via-brand-dark/40 to-brand-dark/80" />
           </div>
           <div className="absolute inset-0 flex items-center justify-center text-center">
             <div className="max-w-3xl px-4">
               <motion.h1 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="text-5xl md:text-7xl font-serif text-brand-beige mb-6"
+                className="text-5xl md:text-7xl font-serif text-white mb-6"
               >
                 Our Story
               </motion.h1>
@@ -72,7 +72,7 @@ export default function About() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="text-brand-light text-lg md:text-xl max-w-2xl mx-auto leading-relaxed"
+                className="text-brand-beige text-lg md:text-xl max-w-2xl mx-auto leading-relaxed"
               >
                 Crafting timeless memories through the lens of passion and creativity
               </motion.p>
@@ -116,12 +116,19 @@ export default function About() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="text-center p-6 bg-white rounded-lg shadow-sm"
+                className="text-center p-8 bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl relative group"
               >
-                <stat.icon className="w-10 h-10 mx-auto mb-4 text-brand-dark" />
-                <div className="text-4xl font-bold text-brand-dark mb-2">{stat.value}</div>
-                <div className="text-lg font-medium text-brand-dark mb-2">{stat.label}</div>
-                <p className="text-brand-muted">{stat.description}</p>
+                <div className="absolute inset-0 bg-gradient-to-br from-brand-beige/5 to-white/50 rounded-2xl transform transition-transform group-hover:scale-105" />
+                <div className="relative">
+                  <div className="relative w-16 h-16 mx-auto mb-4">
+                    <div className="absolute inset-0 bg-brand-beige/10 rounded-2xl transform rotate-6 transition-transform group-hover:rotate-12" />
+                    <div className="absolute inset-0 bg-white rounded-2xl shadow-lg transform group-hover:-rotate-3 transition-transform" />
+                    <stat.icon className="w-8 h-8 absolute inset-0 m-auto text-brand-beige transition-colors group-hover:text-brand-muted" />
+                  </div>
+                  <div className="text-4xl font-bold text-brand-dark mb-2">{stat.value}</div>
+                  <div className="text-lg font-medium text-brand-dark mb-2">{stat.label}</div>
+                  <p className="text-brand-muted">{stat.description}</p>
+                </div>
               </motion.div>
             ))}
           </motion.div>
@@ -144,14 +151,18 @@ export default function About() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: index * 0.1 }}
-                  className="text-center p-6"
+                  className="text-center p-8 bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl relative group overflow-hidden"
                 >
-                  <h3 className="text-2xl font-serif text-brand-dark mb-4">
-                    {value.title}
-                  </h3>
-                  <p className="text-brand-muted">
-                    {value.description}
-                  </p>
+                  <div className="absolute inset-0 bg-gradient-to-br from-brand-beige/5 to-white/50 rounded-2xl transform transition-transform group-hover:scale-105" />
+                  <div className="relative">
+                    <div className="w-16 h-16 mx-auto mb-6 bg-brand-beige/10 rounded-2xl transform rotate-45 group-hover:rotate-90 transition-transform duration-500" />
+                    <h3 className="text-2xl font-serif text-brand-dark mb-4">
+                      {value.title}
+                    </h3>
+                    <p className="text-brand-muted">
+                      {value.description}
+                    </p>
+                  </div>
                 </motion.div>
               ))}
             </div>
@@ -162,16 +173,19 @@ export default function About() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center"
+            className="text-center bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-12 relative overflow-hidden"
           >
-            <h2 className="text-3xl md:text-4xl font-serif text-brand-dark mb-6">
-              Meet Our Team
-            </h2>
-            <p className="text-brand-muted text-lg max-w-2xl mx-auto mb-12">
-              Our talented team of photographers and creative professionals work together to bring your vision to life.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {/* Team members can be added here */}
+            <div className="absolute inset-0 bg-gradient-to-br from-brand-beige/5 to-white/50" />
+            <div className="relative">
+              <h2 className="text-3xl md:text-4xl font-serif text-brand-dark mb-6">
+                Meet Our Team
+              </h2>
+              <p className="text-brand-muted text-lg max-w-2xl mx-auto mb-12">
+                Our talented team of photographers and creative professionals work together to bring your vision to life.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {/* Team members can be added here */}
+              </div>
             </div>
           </motion.div>
         </div>

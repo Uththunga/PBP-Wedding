@@ -1,11 +1,13 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { useBookingStore } from '../store/bookingStore';
 
 export default function Packages() {
   const { packages } = useBookingStore();
+  const location = useLocation();
+  const selectedCategory = 'photography'; // Assuming this is the selected category, replace with actual value
 
   return (
     <div className="min-h-screen bg-brand-beige">
@@ -47,6 +49,13 @@ export default function Packages() {
                     </li>
                   ))}
                 </ul>
+                <Link
+                  to={`/packages/${pkg.id}`}
+                  state={{ from: location.pathname + location.search, category: selectedCategory }}
+                  className="block"
+                >
+                  View Details
+                </Link>
               </div>
             </motion.div>
           ))}

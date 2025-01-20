@@ -35,6 +35,13 @@ export const categories: GalleryCategory[] = [
     description: 'Professional photography for businesses and brands',
     coverImage: 'https://images.unsplash.com/photo-1542744173-8e7e53415bb0',
     path: '/commercial'
+  },
+  {
+    id: 'events',
+    title: 'Events',
+    description: 'Capturing special moments at corporate and social events',
+    coverImage: 'https://images.unsplash.com/photo-1511578314322-379afb476865',
+    path: '/events'
   }
 ];
 
@@ -167,5 +174,39 @@ export const images: GalleryImage[] = [
     category: 'commercial',
     description: 'Lifestyle product photography',
     location: 'Location Shoot'
+  },
+
+  // Event Images
+  {
+    id: 'event-1',
+    url: 'https://images.unsplash.com/photo-1511578314322-379afb476865',
+    title: 'Corporate Conference',
+    category: 'events',
+    description: 'Annual tech conference keynote presentation',
+    location: 'Convention Center'
+  },
+  {
+    id: 'event-2',
+    url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87',
+    title: 'Gala Dinner',
+    category: 'events',
+    description: 'Elegant charity gala dinner event',
+    location: 'Grand Ballroom'
+  },
+  {
+    id: 'event-3',
+    url: 'https://images.unsplash.com/photo-1505236858219-8359eb29e329',
+    title: 'Music Festival',
+    category: 'events',
+    description: 'Outdoor summer music festival',
+    location: 'City Park'
+  },
+  {
+    id: 'event-4',
+    url: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2',
+    title: 'Birthday Party',
+    category: 'events',
+    description: 'Colorful birthday celebration',
+    location: 'Private Venue'
   }
 ];

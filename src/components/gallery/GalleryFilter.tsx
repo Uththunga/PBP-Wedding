@@ -1,54 +1,135 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { GalleryCategory } from '../../types/gallery';
+import { Search, SlidersHorizontal, X } from 'lucide-react';
 
 interface GalleryFilterProps {
   categories: GalleryCategory[];
   activeCategory: string;
   onCategoryChange: (categoryId: string) => void;
+  onSearch: (query: string) => void;
+  onSortChange: (sort: 'newest' | 'oldest' | 'popular') => void;
 }
 
 export default function GalleryFilter({ 
   categories, 
   activeCategory, 
-  onCategoryChange 
+  onCategoryChange,
+  onSearch,
+  onSortChange
 }: GalleryFilterProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedSort, setSelectedSort] = useState<'newest' | 'oldest' | 'popular'>('newest');
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSearch(searchQuery);
+  };
+
+  const handleSortChange = (sort: 'newest' | 'oldest' | 'popular') => {
+    setSelectedSort(sort);
+    onSortChange(sort);
+  };
+
   return (
-    <div className="flex flex-wrap gap-4 justify-center mb-12">
-      <motion.button
-        key="all"
-        onClick={() => onCategoryChange('all')}
-        className={`relative overflow-hidden px-6 py-2 rounded-full font-medium transition-colors group ${
-          activeCategory === 'all'
-            ? 'border-2 border-brand-primary text-white'
-            : 'border-2 border-brand-primary text-brand-primary hover:text-white'
-        }`}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
+    <div className="space-y-6 mb-12">
+      {/* Search Bar */}
+      <form 
+        onSubmit={handleSearch}
+        className="max-w-2xl mx-auto relative px-4 sm:px-0"
       >
-        <span className="relative z-10">All</span>
-        <div className={`absolute inset-0 bg-brand-primary transform transition-transform duration-300 ease-out ${
-          activeCategory === 'all' ? 'translate-x-0' : '-translate-x-full group-hover:translate-x-0'
-        }`} />
-      </motion.button>
-      {categories.map((category) => (
-        <motion.button
-          key={category.id}
-          onClick={() => onCategoryChange(category.id)}
-          className={`relative overflow-hidden px-6 py-2 rounded-full font-medium transition-colors group ${
-            activeCategory === category.id
-              ? 'border-2 border-brand-primary text-white'
-              : 'border-2 border-brand-primary text-brand-primary hover:text-white'
-          }`}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search photos..."
+          className="w-full px-6 py-3 pl-12 rounded-full bg-white shadow-lg focus:ring-2 focus:ring-[#D9CFC4]/20 outline-none transition-shadow text-sm sm:text-base"
+        />
+        <Search className="absolute left-6 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+        <button
+          type="button"
+          onClick={() => setShowFilters(!showFilters)}
+          className="absolute right-6 sm:right-4 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors"
         >
-          <span className="relative z-10">{category.title}</span>
-          <div className={`absolute inset-0 bg-brand-primary transform transition-transform duration-300 ease-out ${
-            activeCategory === category.id ? 'translate-x-0' : '-translate-x-full group-hover:translate-x-0'
-          }`} />
-        </motion.button>
-      ))}
+          <SlidersHorizontal className="w-5 h-5 text-gray-500" />
+        </button>
+      </form>
+
+      {/* Advanced Filters */}
+      <AnimatePresence>
+        {showFilters && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden px-4 sm:px-0"
+          >
+            <div className="max-w-2xl mx-auto bg-white rounded-2xl p-4 sm:p-6 shadow-lg">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-base sm:text-lg font-medium text-gray-900">Sort By</h3>
+                <button
+                  onClick={() => setShowFilters(false)}
+                  className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4">
+                <button
+                  onClick={() => handleSortChange('newest')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    selectedSort === 'newest'
+                      ? 'bg-[#D9CFC4] text-gray-800'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Newest First
+                </button>
+                <button
+                  onClick={() => handleSortChange('oldest')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    selectedSort === 'oldest'
+                      ? 'bg-[#D9CFC4] text-gray-800'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Oldest First
+                </button>
+                <button
+                  onClick={() => handleSortChange('popular')}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    selectedSort === 'popular'
+                      ? 'bg-[#D9CFC4] text-gray-800'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  Most Popular
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Category Pills */}
+      <div className="flex flex-wrap gap-2 sm:gap-3 justify-center px-4 sm:px-0">
+        {categories.map((category) => (
+          <motion.button
+            key={category.id}
+            onClick={() => onCategoryChange(category.id)}
+            className={`relative overflow-hidden px-4 sm:px-6 py-2 rounded-full text-sm sm:text-base font-medium transition-all duration-300 ${
+              activeCategory === category.id
+                ? 'bg-[#D9CFC4] text-gray-800 shadow-lg shadow-[#D9CFC4]/20'
+                : 'bg-white/90 text-gray-700 hover:bg-white border border-gray-200 hover:border-[#D9CFC4]/30 hover:shadow-md'
+            }`}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            {category.title}
+          </motion.button>
+        ))}
+      </div>
     </div>
   );
 }
