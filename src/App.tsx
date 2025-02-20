@@ -15,7 +15,13 @@ import Dashboard from './pages/members/Dashboard';
 
 function App() {
   return (
-    <Router basename="/PBP">
+    <Router 
+      basename="/PBP-Wedding" 
+      future={{ 
+        v7_startTransition: true,
+        v7_relativeSplatPath: true 
+      }}
+    >
       <Layout>
         <div className="relative">
           <Toaster position="bottom-center" />
