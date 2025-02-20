@@ -3,11 +3,9 @@ import { useState, useEffect } from 'react';
 export function useImageLoad(src: string) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [imageElement, setImageElement] = useState<HTMLImageElement | null>(null);
 
   useEffect(() => {
     const img = new Image();
-    setImageElement(img);
     
     const handleLoad = () => {
       setIsLoading(false);
@@ -26,8 +24,10 @@ export function useImageLoad(src: string) {
     return () => {
       img.removeEventListener('load', handleLoad);
       img.removeEventListener('error', handleError);
+      // Cancel the image load if the component unmounts
+      img.src = '';
     };
   }, [src]);
 
-  return { isLoading, error, imageElement };
+  return { isLoading, error };
 }

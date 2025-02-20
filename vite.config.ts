@@ -8,4 +8,12 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  build: {
+    assetsInlineLimit: 0, // Don't inline any assets as base64
+    rollupOptions: {
+      output: {
+        assetFileNames: 'assets/[name]-[hash][extname]', // Keep original file names with hash
+      },
+    },
+  },
 });

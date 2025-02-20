@@ -12,6 +12,7 @@ import Packages from './pages/Packages';
 import Login from './pages/members/Login';
 import Register from './pages/members/Register';
 import Dashboard from './pages/members/Dashboard';
+import CategoryGallery from './pages/gallery/CategoryGallery';
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/gallery" element={<Gallery />} />
+            <Route path="/gallery/:category" element={<CategoryGallery />} />
             <Route path="/booking" element={<Booking />} />
             <Route path="/booking-confirmation" element={<BookingConfirmation />} />
             <Route path="/packages" element={<Packages />} />

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GalleryImage } from '../../types/gallery';
 import { useImageLoad } from '../../hooks/useImageLoad';
@@ -91,15 +91,6 @@ function Lightbox({ image, onClose, onPrev, onNext, hasPrev, hasNext }: Lightbox
           alt={image.title}
           className="max-w-full max-h-[85vh] object-contain mx-auto"
         />
-        <div className="mt-4 text-white text-center">
-          <h3 className="text-xl font-serif mb-2">{image.title}</h3>
-          {image.description && (
-            <p className="text-gray-300">{image.description}</p>
-          )}
-          {image.location && (
-            <p className="text-gray-400 text-sm mt-2">{image.location}</p>
-          )}
-        </div>
       </div>
     </motion.div>
   );
@@ -144,25 +135,16 @@ function GalleryItem({ image, index, onImageClick }: { image: GalleryImage; inde
       />
       
       <motion.div 
-        className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/0"
+        className="absolute inset-0 bg-gradient-to-t from-black/30 via-black/0 opacity-0 group-hover:opacity-100 transition-opacity"
         initial={{ opacity: 0 }}
         whileHover={{ opacity: 1 }}
         transition={{ duration: 0.3 }}
       >
         <div className="absolute bottom-0 left-0 right-0 p-6">
-          <h3 className="text-white text-xl font-serif mb-2">{image.title}</h3>
-          {image.description && (
-            <p className="text-gray-200 text-sm">{image.description}</p>
-          )}
-          {image.location && (
-            <p className="text-gray-300 text-sm mt-2">{image.location}</p>
-          )}
-          <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button className="inline-flex items-center text-white text-sm">
-              <ZoomIn className="w-4 h-4 mr-2" />
-              Click to view
-            </button>
-          </div>
+          <button className="inline-flex items-center text-white text-sm">
+            <ZoomIn className="w-4 h-4 mr-2" />
+            Click to view
+          </button>
         </div>
       </motion.div>
     </motion.div>

@@ -5,65 +5,31 @@ import { ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PackageCard from '../components/packages/PackageCard';
 import { useBookingStore } from '../store/bookingStore';
+import homeHeroImage from '../assets/home-hero.webp';
 
-// Keep only the data we need
-const testimonials = [
-  {
-    name: "Sarah & Michael",
-    role: "Wedding Couple",
-    content: "Our wedding photos are absolutely stunning. Every precious moment was captured with such artistry and emotion!",
-    image: "https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3"
-  },
-  {
-    title: "Elena Martinez",
-    role: "Fashion Model",
-    content: "Working with this team was incredible. They truly understand how to capture the essence of fashion.",
-    image: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?ixlib=rb-4.0.3"
-  },
-  {
-    title: "The Thompson Family",
-    role: "Family Session",
-    content: "They made our family shoot so fun and natural. The photos perfectly capture our family's personality!",
-    image: "https://images.unsplash.com/photo-1511895426328-dc8714191300?ixlib=rb-4.0.3"
-  }
-];
+// Importing wedding photos
+import dilushaWedding from '../assets/wedding/Dilusha-Ruwindi,Wedding/P1.webp';
+import kalpanaWedding from '../assets/wedding/Kalpana-Isuru/R6PB4326.webp';
+import nishdiWedding from '../assets/wedding/Nishdi-Sahan,Wedding/IMGL7034.webp';
 
 const featuredWork = [
   {
-    title: "Beach Wedding",
+    title: "Dilusha & Ruwindi",
     category: "Wedding",
-    image: "https://images.unsplash.com/photo-1519741497674-611481863552",
-    link: "/gallery"
+    image: dilushaWedding,
+    link: "/gallery/dilusha-wedding"
   },
   {
-    title: "Garden Ceremony",
+    title: "Kalpana & Isuru",
     category: "Wedding",
-    image: "https://images.unsplash.com/photo-1606800052052-a08af7148866",
-    link: "/gallery"
+    image: kalpanaWedding,
+    link: "/gallery/kalpana-isuru"
   },
   {
-    title: "First Dance",
+    title: "Nishdi & Sahan",
     category: "Wedding",
-    image: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc",
-    link: "/gallery"
-  },
-  {
-    title: "Wedding Details",
-    category: "Wedding",
-    image: "https://images.unsplash.com/photo-1583939003579-730e3918a45a",
-    link: "/gallery"
-  },
-  {
-    title: "Bride Preparation",
-    category: "Wedding",
-    image: "https://images.unsplash.com/photo-1546804784-896d0dca3805",
-    link: "/gallery"
-  },
-  {
-    title: "Wedding Portraits",
-    category: "Wedding",
-    image: "https://images.unsplash.com/photo-1595407753674-c3305b76ad49",
-    link: "/gallery"
+    image: nishdiWedding,
+    link: "/gallery/nishdi-sahan"
   }
 ];
 
@@ -77,7 +43,7 @@ export default function Home() {
   // Preload hero image
   useEffect(() => {
     const img = new Image();
-    img.src = "https://images.pexels.com/photos/3379934/pexels-photo-3379934.jpeg?auto=compress&cs=tinysrgb&w=1920";
+    img.src = homeHeroImage;
     img.onload = () => setIsImageLoaded(true);
   }, []);
 
@@ -125,7 +91,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-brand-beige">
       {/* Hero Section */}
-      <div id="hero-section" className="relative h-screen bg-brand-dark overflow-hidden">
+      <div id="hero-section" className="relative h-[100svh] bg-brand-dark overflow-hidden">
         {/* Background Image with loading state */}
         <div className="absolute inset-0">
           {isImageLoaded ? (
@@ -133,9 +99,9 @@ export default function Home() {
               initial={{ scale: 1.1 }}
               animate={{ scale: 1 }}
               transition={{ duration: 0.8 }}
-              src="https://images.pexels.com/photos/3379934/pexels-photo-3379934.jpeg?auto=compress&cs=tinysrgb&w=1920"
+              src={homeHeroImage}
               alt="Hero background"
-              className="w-full h-full object-cover opacity-50"
+              className="w-full h-full object-cover opacity-50 sm:opacity-60"
               loading="eager"
               fetchPriority="high"
             />
@@ -145,39 +111,44 @@ export default function Home() {
         </div>
 
         {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/50 sm:from-black/50 sm:via-black/30 sm:to-black/40" />
 
         {/* Content Container */}
-        <div className="relative z-10 h-full flex flex-col items-center justify-center px-4">
-          <motion.h1
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1 }}
-            className="text-[#E2D9D0] font-serif text-4xl md:text-5xl lg:text-6xl mb-4 tracking-wide"
-          >
-            Prauda Buwaneka Photography
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 0.3 }}
-            className="text-[#E2D9D0]/90 text-lg md:text-xl font-light tracking-[0.2em] mb-12"
-          >
-            Capturing moments, creating memories
-          </motion.p>
+        <div className="relative z-10 h-full flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto translate-y-0">
+          <div className="text-center mb-8 sm:mb-12 w-full">
+            <h1 className="text-[#E2D9D0] font-serif">
+              <motion.span
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+                className="block text-[2.5rem] xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl mb-8 sm:mb-10 tracking-wide"
+              >
+                Prauda Buwaneka
+              </motion.span>
+              <motion.span
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.3 }}
+                className="block text-lg xs:text-xl sm:text-2xl md:text-3xl lg:text-4xl tracking-[0.15em] text-[#E2D9D0]/60 font-light"
+              >
+                Photography
+              </motion.span>
+            </h1>
+          </div>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.6 }}
+            className="flex justify-center w-full max-w-[280px] sm:max-w-lg mx-auto mt-8 sm:mt-10"
           >
             <Link
               to="/gallery"
-              className="group relative inline-flex items-center px-8 py-3 text-[#E2D9D0]/90 overflow-hidden rounded-full border border-[#E2D9D0]/20 hover:border-[#E2D9D0]/40 transition-colors duration-300"
+              className="group relative inline-flex items-center justify-center px-6 sm:px-12 py-2.5 sm:py-4 text-[#E2D9D0]/90 overflow-hidden rounded-full border border-[#E2D9D0]/20 hover:border-[#E2D9D0]/40 transition-colors duration-300 w-full sm:w-auto mx-auto"
             >
               <span className="absolute inset-0 bg-gradient-to-r from-brand-primary/10 to-transparent group-hover:from-brand-primary/20 transition-all duration-300"></span>
-              <span className="relative flex items-center text-sm tracking-[0.3em] uppercase">
+              <span className="relative flex items-center justify-center text-xs sm:text-base tracking-[0.15em] sm:tracking-[0.3em] uppercase whitespace-nowrap">
                 Explore Gallery 
-                <ArrowRight className="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" />
+                <ArrowRight className="ml-1.5 sm:ml-2 w-3.5 h-3.5 sm:w-4 sm:h-4 transform group-hover:translate-x-1 transition-transform duration-300" />
               </span>
             </Link>
           </motion.div>
@@ -194,13 +165,13 @@ export default function Home() {
               ease: "easeInOut",
               delay: 1
             }}
-            className="text-[#E2D9D0]/70 flex flex-col items-center cursor-pointer fixed md:absolute bottom-4 md:bottom-8 left-1/2 transform -translate-x-1/2 z-50 hover:text-[#E2D9D0] transition-colors"
+            className="text-white flex flex-col items-center cursor-pointer fixed md:absolute bottom-8 md:bottom-12 left-1/2 transform -translate-x-1/2 z-[100] hover:text-[#E2D9D0] transition-colors"
             onClick={() => handleSmoothScroll('photography-packages')}
           >
             {/* Desktop Scroll Indicator */}
             <div className="hidden md:flex flex-col items-center">
-              <span className="text-xs tracking-[0.2em] uppercase mb-2">Scroll</span>
-              <div className="w-[1px] h-8 bg-[#E2D9D0]/30 relative overflow-hidden">
+              <span className="text-sm tracking-[0.2em] uppercase mb-2 font-medium">Scroll</span>
+              <div className="w-[2px] h-8 bg-white/70 relative overflow-hidden">
                 <motion.div
                   animate={{ 
                     y: [0, 32, 0]
@@ -210,66 +181,39 @@ export default function Home() {
                     repeat: Infinity,
                     ease: "easeInOut"
                   }}
-                  className="absolute top-0 left-0 w-full h-full bg-[#E2D9D0]/70"
+                  className="absolute top-0 left-0 w-full h-full bg-white"
                 />
               </div>
             </div>
 
             {/* Mobile Swipe Indicator */}
-            <div className="flex md:hidden items-center space-x-2 bg-[#E2D9D0]/10 backdrop-blur-sm px-4 py-2 rounded-full">
-              <span className="text-xs tracking-[0.1em] uppercase">Swipe Up</span>
-              <motion.div
+            <div className="flex md:hidden items-center">
+              <span className="text-sm tracking-[0.1em] uppercase font-medium">Swipe</span>
+              <motion.svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width="16" 
+                height="16" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2.5" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+                className="ml-1.5"
                 animate={{ 
-                  y: [-4, 4, -4]
+                  y: [-1, 1, -1],
+                  opacity: [0.7, 1, 0.7]
                 }}
                 transition={{ 
-                  duration: 1.5,
+                  duration: 2,
                   repeat: Infinity,
                   ease: "easeInOut"
                 }}
-                className="relative"
               >
-                <motion.svg 
-                  xmlns="http://www.w3.org/2000/svg" 
-                  width="20" 
-                  height="20" 
-                  viewBox="0 0 24 24" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="2" 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round"
-                >
-                  <path d="M12 20V4M5 11l7-7 7 7"/>
-                </motion.svg>
-                <motion.div
-                  className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1"
-                  animate={{
-                    opacity: [0, 1, 0],
-                    y: [-8, 0, -8]
-                  }}
-                  transition={{
-                    duration: 1.5,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }}
-                >
-                  <svg 
-                    xmlns="http://www.w3.org/2000/svg" 
-                    width="16" 
-                    height="16" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2" 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round"
-                  >
-                    <path d="M12 20V4M5 11l7-7 7 7"/>
-                  </svg>
-                </motion.div>
-              </motion.div>
+                <path d="M12 19V5M5 12l7-7 7 7"/>
+              </motion.svg>
             </div>
+
           </motion.div>
         </div>
       </div>
@@ -277,48 +221,75 @@ export default function Home() {
       {/* Wrap sections in Suspense for lazy loading */}
       <Suspense fallback={<div className="w-full h-64 bg-brand-beige/50 animate-pulse" />}>
         {/* Photography Packages Section */}
-        <section id="photography-packages" className="relative py-24 md:py-40 px-4 md:px-8 bg-gradient-to-b from-brand-beige/20 to-white">
+        <section id="photography-packages" className="relative py-16 sm:py-24 md:py-32 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-brand-beige/20 via-white to-brand-beige/10">
+          <div className="absolute inset-0 bg-[url('/src/assets/home-hero.webp')] bg-fixed bg-cover bg-center opacity-5" />
           <div className="relative max-w-[1400px] mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-center mb-8 sm:mb-12 lg:mb-16 px-4 sm:px-6 lg:px-8"
+              className="text-center mb-12 sm:mb-16 max-w-3xl mx-auto px-4 sm:px-6"
             >
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-serif text-brand-dark mb-3 sm:mb-4">Wedding Photography Packages</h2>
-              <p className="text-sm sm:text-base lg:text-lg text-brand-muted max-w-2xl mx-auto">
-                Choose the perfect package for your special day
+              <motion.span
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+                className="inline-block bg-brand-beige/30 text-brand-dark px-3 sm:px-4 py-1 rounded-full text-sm tracking-wider mb-4 sm:mb-6"
+              >
+                Wedding Photography
+              </motion.span>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-serif text-brand-dark mb-4 sm:mb-6">Capture Your Perfect Day</h2>
+              <p className="text-base sm:text-lg text-brand-muted leading-relaxed max-w-2xl mx-auto">
+                Choose from our carefully curated collection of wedding photography packages, each designed to preserve your precious moments in timeless elegance.
               </p>
             </motion.div>
 
             {/* Package Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-12 max-w-[90rem] mx-auto">
               {packages
                 .filter(pkg => pkg.category === 'Wedding')
                 .map((pkg, index) => (
-                  <PackageCard 
-                    key={pkg.id} 
-                    package={pkg} 
-                    onBook={() => navigate(`/packages/${pkg.id}`)} 
-                    index={index}
-                  />
+                  <motion.div
+                    key={pkg.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.2 }}
+                    viewport={{ once: true }}
+                  >
+                    <PackageCard 
+                      package={pkg} 
+                      onBook={() => navigate(`/packages/${pkg.id}`)} 
+                      index={index}
+                      featured={pkg.id === 'wedding-premium'}
+                    />
+                  </motion.div>
                 ))}
             </div>
 
-            {/* CTA Section */}
+            {/* Enhanced CTA Section */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-center mt-20"
+              className="text-center mt-12 sm:mt-16 md:mt-20"
             >
-              <Link
-                to="/packages"
-                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                className="inline-block border-2 border-brand-dark text-brand-dark px-10 py-4 rounded-full hover:bg-brand-dark hover:text-brand-beige transition-colors duration-300 font-medium text-lg"
-              >
-                Compare All Packages
-              </Link>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8">
+                <Link
+                  to="/packages"
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  className="w-full sm:w-auto inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 bg-brand-dark text-brand-beige rounded-full hover:bg-brand-dark/90 transition-all duration-300 group shadow-lg text-sm sm:text-base"
+                >
+                  <span className="tracking-wider font-medium">Compare All Packages</span>
+                  <ArrowRight className="ml-2 w-4 h-4 transform group-hover:translate-x-1 transition-transform duration-300" />
+                </Link>
+                <Link
+                  to="/contact"
+                  className="w-full sm:w-auto inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-4 border-2 border-brand-dark text-brand-dark rounded-full hover:bg-brand-dark hover:text-brand-beige transition-all duration-300 group text-sm sm:text-base"
+                >
+                  <span className="tracking-wider font-medium">Request Custom Package</span>
+                </Link>
+              </div>
             </motion.div>
           </div>
         </section>
@@ -326,17 +297,17 @@ export default function Home() {
 
       <Suspense fallback={<div className="w-full h-64 bg-brand-beige/50 animate-pulse" />}>
         {/* Featured Work Section */}
-        <section className="py-12 md:py-16 bg-[#F8F5F3]">
-          <div className="container mx-auto px-4">
-            <div className="max-w-2xl mx-auto text-center mb-8">
-              <h2 className="text-3xl md:text-4xl font-serif text-brand-dark mb-3">Featured Wedding Photos</h2>
-              <p className="text-brand-muted text-base md:text-lg">
+        <section className="py-12 sm:py-16 md:py-20 bg-[#F8F5F3]">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mx-auto text-center mb-8 sm:mb-12">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif text-brand-dark mb-3 sm:mb-4">Featured Wedding Photos</h2>
+              <p className="text-sm sm:text-base md:text-lg text-brand-muted">
                 Explore a curated collection of our most beautiful wedding photography moments that tell unique love stories.
               </p>
             </div>
 
-            <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="grid grid-cols-3 gap-8 mb-8">
+            <div className="max-w-[1200px] mx-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">
                 {featuredWork.map((image, index) => (
                   <motion.div
                     key={image.title}
@@ -374,7 +345,7 @@ export default function Home() {
               <div className="text-center">
                 <Link
                   to="/gallery"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#D9CFC4] text-gray-800 rounded-full text-sm font-medium hover:bg-[#D9CFC4]/90 transition-all duration-300 group"
+                  className="inline-flex items-center justify-center gap-2 px-8 sm:px-12 py-3 sm:py-4 bg-[#D9CFC4] text-gray-800 rounded-full text-sm sm:text-base font-medium tracking-wider sm:tracking-[0.2em] uppercase hover:bg-[#D9CFC4]/90 transition-all duration-300 group"
                 >
                   <span>View Wedding Gallery</span>
                   <motion.span
@@ -390,58 +361,8 @@ export default function Home() {
         </section>
       </Suspense>
 
-      {/* Testimonials Section */}
-      <section className="py-16 md:py-20 px-4 md:px-6 bg-brand-light">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-serif text-brand-dark mb-3">Client Testimonials</h2>
-            <p className="text-brand-muted max-w-2xl mx-auto">
-              What our clients say about their experience with us
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <div className="relative w-20 h-20 mx-auto mb-4">
-                  <img
-                    src={testimonial.image}
-                    alt={testimonial.name || testimonial.title}
-                    loading="lazy"
-                    width={80}
-                    height={80}
-                    className="w-full h-full object-cover rounded-full"
-                  />
-                </div>
-                <blockquote className="text-brand-dark text-center mb-4">
-                  "{testimonial.content}"
-                </blockquote>
-                <div className="text-center">
-                  <cite className="text-brand-primary font-medium block not-italic">
-                    {testimonial.name || testimonial.title}
-                  </cite>
-                  <span className="text-sm text-brand-muted">{testimonial.role}</span>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Contact CTA Section */}
-      <section className="py-16 md:py-20 px-4 md:px-6 bg-brand-beige">
+      <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 bg-brand-beige">
         <div className="max-w-7xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -449,48 +370,46 @@ export default function Home() {
             viewport={{ once: true }}
             className="max-w-3xl mx-auto"
           >
-            <h2 className="text-3xl md:text-4xl font-serif text-brand-dark mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif text-brand-dark mb-3 sm:mb-4">
               Ready to Create Your Story?
             </h2>
-            <p className="text-brand-muted mb-8">
+            <p className="text-sm sm:text-base text-brand-muted mb-6 sm:mb-8">
               Let's work together to capture your special moments in extraordinary ways
             </p>
-            <a
-              href="/booking"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block border-2 border-brand-dark text-brand-dark px-8 py-3 rounded-full hover:bg-brand-dark hover:text-brand-beige transition-colors duration-300 font-medium"
+            <Link
+              to="/booking"
+              className="inline-flex items-center justify-center px-8 sm:px-12 py-3 sm:py-4 border-2 border-brand-dark text-brand-dark rounded-full hover:bg-brand-dark hover:text-brand-beige transition-all duration-300 text-sm sm:text-base font-medium tracking-wider sm:tracking-[0.2em] uppercase"
             >
               Book a Session
-            </a>
+            </Link>
           </motion.div>
         </div>
       </section>
 
       {/* Back to Top Button */}
       <AnimatePresence>
-  {showBackToTop && (
-    <motion.button
-      onClick={handleScrollToTop}
-      className="group fixed bottom-6 right-6 z-50 p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 20 }}
-      whileHover={{ scale: 1.05 }}
-    >
-      <span className="absolute inset-0 rounded-full bg-gradient-to-r from-brand-primary/20 to-transparent group-hover:from-brand-primary/40 transition-all duration-300"></span>
-      <svg 
-        xmlns="http://www.w3.org/2000/svg" 
-        className="relative h-6 w-6 text-white transform group-hover:-translate-y-1 transition-transform duration-300"
-        fill="none"
-        viewBox="0 0 24 24" 
-        stroke="currentColor"
-      >
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 20V4M5 11l7-7 7 7"/>
-      </svg>
-    </motion.button>
-  )}
-</AnimatePresence>
+        {showBackToTop && (
+          <motion.button
+            onClick={handleScrollToTop}
+            className="group fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-50 p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 shadow-lg hover:shadow-xl transition-all duration-300"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            whileHover={{ scale: 1.05 }}
+          >
+            <span className="absolute inset-0 rounded-full bg-gradient-to-r from-brand-primary/20 to-transparent group-hover:from-brand-primary/40 transition-all duration-300"></span>
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              className="relative h-6 w-6 text-white transform group-hover:-translate-y-1 transition-transform duration-300"
+              fill="none"
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 20V4M5 11l7-7 7 7"/>
+            </svg>
+          </motion.button>
+        )}
+      </AnimatePresence>
 
     </div>
   );

@@ -3,6 +3,9 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
+      screens: {
+        'xs': '375px',
+      },
       colors: {
         'brand': {
           beige: '#C5B9A5',  // Main beige color from logo

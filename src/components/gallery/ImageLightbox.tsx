@@ -23,22 +23,14 @@ export default function ImageLightbox({
 
   const currentImage = images[currentIndex];
 
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'Escape') onClose();
-    if (e.key === 'ArrowRight') onNext();
-    if (e.key === 'ArrowLeft') onPrev();
-  };
-
   return (
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/95"
         onClick={onClose}
-        onKeyDown={handleKeyDown}
-        tabIndex={0}
       >
         {/* Close button */}
         <button
@@ -73,40 +65,49 @@ export default function ImageLightbox({
           className="relative max-w-[90vw] max-h-[90vh]"
           onClick={(e) => e.stopPropagation()}
         >
-          <img
+          <motion.img
+            key={currentImage.url}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
             src={currentImage.url}
             alt={currentImage.title}
-            className="max-w-full max-h-[90vh] object-contain"
+            className="max-w-full max-h-[90vh] object-contain rounded-lg"
           />
           
-          {/* Image info */}
-          <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent text-white">
-            <h3 className="text-xl font-semibold mb-1">{currentImage.title}</h3>
-            <p className="text-sm text-white/90 mb-2">{currentImage.description}</p>
-            
-            {/* Actions */}
-            <div className="flex gap-2">
-              <button
-                className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-                onClick={() => window.open(currentImage.url, '_blank')}
-              >
-                <Download className="w-5 h-5" />
-              </button>
-              <button
-                className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-                onClick={() => {
-                  if (navigator.share) {
-                    navigator.share({
-                      title: currentImage.title,
-                      text: currentImage.description,
-                      url: currentImage.url,
-                    });
-                  }
-                }}
-              >
-                <Share2 className="w-5 h-5" />
-              </button>
-            </div>
+          {/* Actions */}
+          <div className="absolute bottom-4 right-4 flex gap-2">
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                window.open(currentImage.url, '_blank');
+              }}
+            >
+              <Download className="w-5 h-5" />
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (navigator.share) {
+                  navigator.share({
+                    title: currentImage.title,
+                    text: currentImage.description,
+                    url: currentImage.url,
+                  }).catch(() => {
+                    // Handle any errors silently
+                  });
+                }
+              }}
+            >
+              <Share2 className="w-5 h-5" />
+            </motion.button>
           </div>
         </div>
       </motion.div>

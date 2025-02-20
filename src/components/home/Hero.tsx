@@ -3,6 +3,9 @@ import { motion } from 'framer-motion';
 import { branding } from '../../config/branding';
 
 export default function Hero() {
+  const [firstName, ...rest] = branding.name.split(' ');
+  const lastName = rest.join(' ');
+
   return (
     <div className="relative h-screen">
       <div className="absolute inset-0">
@@ -22,7 +25,9 @@ export default function Hero() {
           className="text-center px-4"
         >
           <h1 className="text-4xl md:text-6xl font-serif text-brand-beige mb-6">
-            {branding.name}
+            {firstName}
+            <br className="md:hidden" />
+            <span className="inline-block mt-2 md:mt-0 md:ml-3">{lastName}</span>
           </h1>
           <p className="text-brand-light text-lg md:text-xl font-serif mb-8 max-w-2xl mx-auto leading-relaxed">
             {branding.tagline}
