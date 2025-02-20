@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate, useParams, useLocation, Link } from 'react-router-dom';
-import { ArrowLeft, Check, Plus, Lock, Star, Minus, Camera } from 'lucide-react';
+import { ArrowLeft, Check, Plus, Lock, Minus, Camera } from 'lucide-react';
 import { useBookingStore } from '../store/bookingStore';
 import { useAuthStore } from '../store/authStore';
 import LoginModal from '../components/auth/LoginModal';
@@ -23,70 +23,52 @@ export default function PackageDetails() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  const additionalServices = {
-    // Wedding Services
-    'wedding-premium': [
-      { id: 'engagement', name: 'Engagement Session', price: 250, description: 'A 1-hour engagement session with a professional photographer.' },
-      { id: 'album', name: 'Premium Photo Album', price: 300, description: 'A beautifully designed photo album with 20 pages.' },
-      { id: 'drone', name: 'Drone Coverage', price: 200, description: 'Capture your special day from a unique perspective with our drone coverage.' },
-      { id: 'prints', name: 'Premium Prints Package', price: 150, description: 'A set of 10 premium prints, perfect for framing and sharing with loved ones.' },
-    ],
-    'wedding-essential': [
-      { id: 'engagement', name: 'Engagement Session', price: 200, description: 'A 1-hour engagement session with a professional photographer.' },
-      { id: 'album', name: 'Photo Album', price: 200, description: 'A beautifully designed photo album with 15 pages.' },
-      { id: 'prints', name: 'Prints Package', price: 150, description: 'A set of 8 premium prints for sharing with loved ones.' },
-    ],
-    // Fashion Services
-    'fashion-editorial': [
-      { id: 'makeup', name: 'Professional Makeup', price: 150, description: 'Full makeup service by a professional artist.' },
-      { id: 'styling', name: 'Styling Service', price: 200, description: 'Professional styling consultation and wardrobe assistance.' },
-      { id: 'location', name: 'Premium Location', price: 250, description: 'Access to exclusive shooting locations.' },
-    ],
-    'fashion-portfolio': [
-      { id: 'makeup', name: 'Basic Makeup', price: 100, description: 'Basic makeup service for a polished look.' },
-      { id: 'retouching', name: 'Advanced Retouching', price: 150, description: 'Premium retouching for portfolio-ready images.' },
-    ],
-    // Family Services
-    'family-extended': [
-      { id: 'location', name: 'Additional Location', price: 150, description: 'Add an extra premium location to your session.' },
-      { id: 'prints', name: 'Extended Family Print Package', price: 200, description: 'A comprehensive collection of family prints in various sizes.' },
-      { id: 'digital', name: 'Extra Digital Images', price: 150, description: '20 additional fully edited digital images.' },
-      { id: 'album', name: 'Family Album', price: 180, description: 'A custom-designed family photo album.' },
-    ],
-    // Portrait Services
-    'portrait-professional': [
-      { id: 'makeup', name: 'Professional Makeup', price: 100, description: 'Professional makeup service for a polished look.' },
-      { id: 'retouching', name: 'Advanced Retouching', price: 80, description: 'Premium retouching for all selected images.' },
-      { id: 'prints', name: 'Professional Print Package', price: 120, description: 'High-quality prints in various sizes.' },
-    ],
-    'portrait-creative': [
-      { id: 'styling', name: 'Creative Styling', price: 150, description: 'Professional styling and creative direction.' },
-      { id: 'effects', name: 'Special Effects', price: 200, description: 'Creative post-processing and artistic effects.' },
-      { id: 'location', name: 'Unique Location', price: 180, description: 'Access to unique and artistic shooting locations.' },
-    ],
-    // Commercial Services
-    'commercial-product': [
-      { id: 'setup', name: 'Advanced Setup', price: 200, description: 'Professional product styling and advanced lighting setup.' },
-      { id: 'retouching', name: 'Premium Retouching', price: 150, description: 'High-end retouching and color correction.' },
-      { id: 'rights', name: 'Extended Usage Rights', price: 300, description: 'Extended commercial usage rights for all images.' },
-    ],
-    'commercial-corporate': [
-      { id: 'location', name: 'Multiple Locations', price: 250, description: 'Photography at multiple corporate locations.' },
-      { id: 'editing', name: 'Rush Editing', price: 200, description: '24-hour turnaround for edited images.' },
-      { id: 'rights', name: 'Full Rights Package', price: 400, description: 'Complete commercial usage rights and raw files.' },
-    ],
+  const basePrices = {
+    'wedding-luxury': 4500,
+    'wedding-premium': 3500,
+    'wedding-classic': 2800,
+    'wedding-essential': 2000,
+    'wedding-intimate': 1500,
+    'wedding-micro': 1000
   };
 
-  const basePrices = {
-    'wedding-premium': 2500,
-    'wedding-essential': 1500,
-    'fashion-editorial': 1200,
-    'fashion-portfolio': 800,
-    'family-extended': 600,
-    'portrait-professional': 300,
-    'portrait-creative': 500,
-    'commercial-product': 1000,
-    'commercial-corporate': 1500
+  const additionalServices = {
+    'wedding-luxury': [
+      { id: 'second-engagement', name: 'Second Engagement Session', price: 400, description: 'Additional engagement session at a different location.' },
+      { id: 'extra-album', name: 'Extra Premium Album', price: 500, description: 'Additional 40-page premium leather-bound album.' },
+      { id: 'video-highlight', name: 'Video Highlight Reel', price: 800, description: '5-minute cinematic highlight video of your special day.' },
+      { id: 'prints-collection', name: 'Luxury Print Collection', price: 300, description: 'Set of 20 premium prints in presentation box.' }
+    ],
+    'wedding-premium': [
+      { id: 'engagement', name: 'Extended Engagement Session', price: 300, description: '2-hour engagement session with multiple locations.' },
+      { id: 'album', name: 'Premium Photo Album', price: 400, description: 'Additional 30-page premium album.' },
+      { id: 'drone', name: 'Extended Drone Coverage', price: 300, description: 'Additional drone coverage time and locations.' },
+      { id: 'prints', name: 'Premium Prints Package', price: 250, description: 'Set of 15 premium prints.' }
+    ],
+    'wedding-classic': [
+      { id: 'engagement', name: 'Engagement Session', price: 250, description: '1.5-hour engagement session.' },
+      { id: 'album', name: 'Extra Photo Album', price: 300, description: 'Additional 25-page hardcover album.' },
+      { id: 'drone', name: 'Drone Coverage', price: 250, description: 'Aerial photography coverage.' },
+      { id: 'prints', name: 'Classic Print Package', price: 200, description: 'Set of 12 premium prints.' }
+    ],
+    'wedding-essential': [
+      { id: 'engagement', name: 'Mini Engagement Session', price: 200, description: '1-hour engagement session.' },
+      { id: 'album', name: 'Photo Album', price: 250, description: 'Additional 20-page photo album.' },
+      { id: 'extra-hours', name: 'Extra Coverage Hours', price: 200, description: '2 additional hours of photography coverage.' },
+      { id: 'prints', name: 'Essential Print Package', price: 150, description: 'Set of 10 prints.' }
+    ],
+    'wedding-intimate': [
+      { id: 'engagement', name: 'Mini Engagement Session', price: 150, description: '45-minute engagement session.' },
+      { id: 'album', name: 'Basic Photo Album', price: 200, description: 'Additional 15-page photo album.' },
+      { id: 'extra-hour', name: 'Extra Coverage Hour', price: 150, description: '1 additional hour of photography coverage.' },
+      { id: 'prints', name: 'Print Package', price: 100, description: 'Set of 8 prints.' }
+    ],
+    'wedding-micro': [
+      { id: 'mini-engagement', name: 'Mini Engagement Session', price: 100, description: '30-minute engagement session.' },
+      { id: 'album', name: 'Simple Photo Album', price: 150, description: '12-page photo album.' },
+      { id: 'extra-hour', name: 'Extra Coverage Hour', price: 150, description: '1 additional hour of photography coverage.' },
+      { id: 'prints', name: 'Basic Print Package', price: 75, description: 'Set of 5 prints.' }
+    ]
   };
 
   const [selectedAddons, setSelectedAddons] = useState<string[]>([]);
@@ -110,11 +92,6 @@ export default function PackageDetails() {
       return total + (service?.price || 0);
     }, 0);
     return basePrice + addonsPrice;
-  };
-
-  const getServiceDescription = (serviceId: string) => {
-    const service = services.find(s => s.id === serviceId);
-    return service?.description || '';
   };
 
   const handleBack = () => {
@@ -145,10 +122,6 @@ export default function PackageDetails() {
   // Get the category from the package ID if category is not directly available
   const getPackageCategory = (packageId: string) => {
     if (packageId.includes('wedding')) return 'Wedding';
-    if (packageId.includes('fashion')) return 'Fashion';
-    if (packageId.includes('family')) return 'Family';
-    if (packageId.includes('portrait')) return 'Portrait';
-    if (packageId.includes('commercial')) return 'Commercial';
     return 'Photography';
   };
 
@@ -410,10 +383,6 @@ export default function PackageDetails() {
             </h2>
             <p className="text-brand-muted mb-8">
               {packageCategory === 'Wedding' && "Let's capture the magic of your special day together"}
-              {packageCategory === 'Fashion' && "Transform your vision into stunning fashion photography"}
-              {packageCategory === 'Family' && "Create timeless memories with your loved ones"}
-              {packageCategory === 'Portrait' && "Let's capture your unique personality and style"}
-              {packageCategory === 'Commercial' && "Elevate your brand with professional photography"}
             </p>
             <Link
               to="/booking"

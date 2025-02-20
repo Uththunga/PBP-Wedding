@@ -1,14 +1,12 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect, Suspense } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Heart, Camera, Users, Briefcase, Sparkles, Star, Check } from 'lucide-react';
-import { scrollToTop } from '../utils/scrollUtils';
-import { useAuthStore } from '../store/authStore';
+import { ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import PackageCard from '../components/packages/PackageCard';
+import { useBookingStore } from '../store/bookingStore';
 
-// Lazy load Hero component
-const Hero = lazy(() => import('../components/home/Hero'));
-
-// Optimize image loading with modern formats and sizes
+// Keep only the data we need
 const testimonials = [
   {
     name: "Sarah & Michael",
@@ -30,297 +28,51 @@ const testimonials = [
   }
 ];
 
-const services = [
-  {
-    icon: Heart,
-    title: "Wedding Photography",
-    description: "Capturing your special day with elegance and emotion",
-    path: "/wedding",
-    features: ["Full day coverage", "Second photographer", "Engagement session"]
-  },
-  {
-    icon: Sparkles,
-    title: "Fashion Photography",
-    description: "Editorial and high-fashion photography that stands out",
-    path: "/fashion",
-    features: ["Studio sessions", "Location shoots", "Professional styling"]
-  },
-  {
-    icon: Users,
-    title: "Family Photography",
-    description: "Natural and candid family moments",
-    path: "/family",
-    features: ["Outdoor sessions", "Multiple locations", "Digital gallery"]
-  },
-  {
-    icon: Camera,
-    title: "Portrait Photography",
-    description: "Professional portraits that tell your story",
-    path: "/portraits",
-    features: ["Studio/Outdoor", "Multiple outfits", "Retouched photos"]
-  },
-  {
-    icon: Briefcase,
-    title: "Commercial Photography",
-    description: "Professional imagery for your business",
-    path: "/commercial",
-    features: ["Product photography", "Corporate events", "Brand storytelling"]
-  }
-];
-
-const processSteps = [
-  {
-    number: "01",
-    title: "Initial Consultation",
-    description: "We discuss your vision and requirements"
-  },
-  {
-    number: "02",
-    title: "Planning Session",
-    description: "Detailed planning of the shoot and locations"
-  },
-  {
-    number: "03",
-    title: "Photo Session",
-    description: "Professional photography with attention to detail"
-  },
-  {
-    number: "04",
-    title: "Post-Processing",
-    description: "Artistic editing and enhancement of your photos"
-  }
-];
-
 const featuredWork = [
   {
-    title: "Wedding",
+    title: "Beach Wedding",
     category: "Wedding",
-    image: "https://images.unsplash.com/photo-1519741497674-611481863552?ixlib=rb-4.0.3",
-    link: "/wedding"
+    image: "https://images.unsplash.com/photo-1519741497674-611481863552",
+    link: "/gallery"
   },
   {
-    title: "Fashion",
-    category: "Fashion",
-    image: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?ixlib=rb-4.0.3",
-    link: "/fashion"
+    title: "Garden Ceremony",
+    category: "Wedding",
+    image: "https://images.unsplash.com/photo-1606800052052-a08af7148866",
+    link: "/gallery"
   },
   {
-    title: "Family",
-    category: "Family",
-    image: "https://images.unsplash.com/photo-1511895426328-dc8714191300?ixlib=rb-4.0.3",
-    link: "/family"
+    title: "First Dance",
+    category: "Wedding",
+    image: "https://images.unsplash.com/photo-1511285560929-80b456fea0bc",
+    link: "/gallery"
   },
   {
-    title: "Portrait",
-    category: "Portrait",
-    image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3",
-    link: "/portraits"
+    title: "Wedding Details",
+    category: "Wedding",
+    image: "https://images.unsplash.com/photo-1583939003579-730e3918a45a",
+    link: "/gallery"
   },
   {
-    title: "Commercial",
-    category: "Commercial",
-    image: "https://images.unsplash.com/photo-1664575197229-3bbebc281874?ixlib=rb-4.0.3",
-    link: "/commercial"
+    title: "Bride Preparation",
+    category: "Wedding",
+    image: "https://images.unsplash.com/photo-1546804784-896d0dca3805",
+    link: "/gallery"
   },
   {
-    title: "Events",
-    category: "Events",
-    image: "https://images.unsplash.com/photo-1511578314322-379afb476865?ixlib=rb-4.0.3",
-    link: "/events"
-  }
-];
-
-const packages = [
-  // Wedding Packages
-  {
-    id: 'wedding-premium',
-    category: 'Wedding',
-    name: "Premium Wedding",
-    description: "Complete wedding day coverage with luxury extras",
-    features: [
-      'Full day coverage (10 hours)',
-      'Two professional photographers',
-      'Engagement session included',
-      'Premium leather-bound album',
-      'Online gallery with high-res images',
-      'Drone aerial shots'
-    ]
-  },
-  {
-    id: 'wedding-essential',
-    category: 'Wedding',
-    name: "Wedding Essentials",
-    description: "Perfect coverage for intimate weddings",
-    features: [
-      '8 hours of coverage',
-      'Second photographer',
-      'Digital gallery with downloads',
-      'Custom photo album',
-      'Engagement mini-session',
-      'Print release included'
-    ]
-  },
-  // Fashion Packages
-  {
-    id: 'fashion-editorial',
-    category: 'Fashion',
-    name: "Editorial Fashion",
-    description: "Professional fashion photography for magazines and portfolios",
-    features: [
-      'Studio or location shoot',
-      'Professional styling consultation',
-      'Multiple outfit changes',
-      'High-end retouching',
-      'Commercial usage rights',
-      'Digital and print delivery'
-    ]
-  },
-  {
-    id: 'fashion-portfolio',
-    category: 'Fashion',
-    name: "Model Portfolio",
-    description: "Build your modeling portfolio with professional shots",
-    features: [
-      '4 hours of shooting',
-      'Multiple looks and setups',
-      'Basic retouching included',
-      'Digital gallery delivery',
-      'Print release',
-      '25 final edited images'
-    ]
-  },
-  // Family Packages
-  {
-    id: 'family-standard',
-    category: 'Family',
-    name: "Family Portrait",
-    description: "Capture precious family moments in beautiful settings",
-    features: [
-      '2 hours of coverage',
-      'Multiple locations',
-      'Digital gallery',
-      'Print release',
-      'Professional editing',
-      '20 high-res photos'
-    ]
-  },
-  {
-    id: 'family-extended',
-    category: 'Family',
-    name: "Extended Family Session",
-    description: "Perfect for large family gatherings and reunions",
-    features: [
-      '3 hours of coverage',
-      'Multiple group combinations',
-      'Individual family shots',
-      'Online gallery sharing',
-      'Premium editing',
-      '30 high-res photos'
-    ]
-  },
-  // Portrait Packages
-  {
-    id: 'portrait-professional',
-    category: 'Portraits',
-    name: "Professional Headshots",
-    description: "Perfect for business profiles and professional use",
-    features: [
-      'Studio session',
-      'Multiple backgrounds',
-      'Professional retouching',
-      'Quick turnaround',
-      'Digital delivery',
-      '5 final edited images'
-    ]
-  },
-  {
-    id: 'portrait-creative',
-    category: 'Portraits',
-    name: "Creative Portrait",
-    description: "Artistic portraits that capture your personality",
-    features: [
-      'Indoor/outdoor locations',
-      'Creative lighting setups',
-      'Outfit changes',
-      'Artistic editing',
-      'Online gallery',
-      '15 edited photos'
-    ]
-  },
-  // Commercial Packages
-  {
-    id: 'commercial-product',
-    category: 'Commercial',
-    name: "Product Photography",
-    description: "Professional product photography for your business",
-    features: [
-      'Studio setup',
-      'Multiple angles',
-      'White background',
-      'Basic retouching',
-      'Commercial usage rights',
-      'Quick turnaround'
-    ]
-  },
-  {
-    id: 'commercial-corporate',
-    category: 'Commercial',
-    name: "Corporate Package",
-    description: "Complete corporate photography solution",
-    features: [
-      'Event coverage',
-      'Team headshots',
-      'Office environment shots',
-      'Same-day previews',
-      'Commercial license',
-      'Rush delivery available'
-    ]
-  }
-];
-
-const expertiseItems = [
-  {
-    title: "Wedding",
-    description: "Capturing your special moments",
-    link: "/wedding",
-    icon: <Heart className="w-6 h-6" />
-  },
-  {
-    title: "Fashion",
-    description: "Editorial & high-fashion shoots",
-    link: "/fashion",
-    icon: <Sparkles className="w-6 h-6" />
-  },
-  {
-    title: "Family",
-    description: "Natural family moments",
-    link: "/family",
-    icon: <Users className="w-6 h-6" />
-  },
-  {
-    title: "Portrait",
-    description: "Professional portraits",
-    link: "/portraits",
-    icon: <Camera className="w-6 h-6" />
-  },
-  {
-    title: "Commercial",
-    description: "Business photography",
-    link: "/commercial",
-    icon: <Briefcase className="w-6 h-6" />
+    title: "Wedding Portraits",
+    category: "Wedding",
+    image: "https://images.unsplash.com/photo-1595407753674-c3305b76ad49",
+    link: "/gallery"
   }
 ];
 
 export default function Home() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuthStore();
-  const categories = ['Wedding', 'Fashion', 'Family', 'Portraits', 'Commercial'];
-  
-  const [activeTestimonial, setActiveTestimonial] = useState(0);
-  const [activeCategory, setActiveCategory] = useState('Wedding');
   const [isImageLoaded, setIsImageLoaded] = useState(false);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const { packages } = useBookingStore();
 
   // Preload hero image
   useEffect(() => {
@@ -328,18 +80,6 @@ export default function Home() {
     img.src = "https://images.pexels.com/photos/3379934/pexels-photo-3379934.jpeg?auto=compress&cs=tinysrgb&w=1920";
     img.onload = () => setIsImageLoaded(true);
   }, []);
-
-  // Update active category when location state changes
-  useEffect(() => {
-    if (location.state?.activeCategory) {
-      const category = categories.find(
-        cat => cat.toLowerCase() === location.state.activeCategory.toLowerCase()
-      );
-      if (category) {
-        setActiveCategory(category);
-      }
-    }
-  }, [location.state]);
 
   // Scroll to section effect
   useEffect(() => {
@@ -366,18 +106,8 @@ export default function Home() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const filteredPackages = packages.filter(pkg => pkg.category === activeCategory);
-
   const handleScrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handlePackageClick = (packageId: string, category: string) => {
-    // Scroll to top before navigation
-    window.scrollTo({ top: 0, behavior: 'instant' });
-    navigate(`/packages/${packageId}`, {
-      state: { fromCategory: category }
-    });
   };
 
   // Scroll handler for smooth scrolling
@@ -407,7 +137,7 @@ export default function Home() {
               alt="Hero background"
               className="w-full h-full object-cover opacity-50"
               loading="eager"
-              fetchpriority="high"
+              fetchPriority="high"
             />
           ) : (
             <div className="w-full h-full bg-brand-dark animate-pulse" />
@@ -547,121 +277,49 @@ export default function Home() {
       {/* Wrap sections in Suspense for lazy loading */}
       <Suspense fallback={<div className="w-full h-64 bg-brand-beige/50 animate-pulse" />}>
         {/* Photography Packages Section */}
-        <section id="photography-packages" className="relative py-16 md:py-32 px-4 md:px-6 bg-brand-beige/20">
-          <div className="relative max-w-7xl mx-auto">
+        <section id="photography-packages" className="relative py-24 md:py-40 px-4 md:px-8 bg-gradient-to-b from-brand-beige/20 to-white">
+          <div className="relative max-w-[1400px] mx-auto">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-center mb-10 md:mb-16"
+              className="text-center mb-8 sm:mb-12 lg:mb-16 px-4 sm:px-6 lg:px-8"
             >
-              <h2 className="text-3xl md:text-5xl font-serif text-brand-dark mb-3 md:mb-5">Photography Packages</h2>
-              <p className="text-brand-muted text-base md:text-lg max-w-2xl mx-auto mb-8 md:mb-12">
-                Choose the perfect package for your special moments
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-serif text-brand-dark mb-3 sm:mb-4">Wedding Photography Packages</h2>
+              <p className="text-sm sm:text-base lg:text-lg text-brand-muted max-w-2xl mx-auto">
+                Choose the perfect package for your special day
               </p>
-              
-              {/* Category Tabs */}
-              <div className="flex flex-wrap justify-center gap-2 md:gap-4">
-                {categories.map((category) => (
-                  <button
-                    key={category}
-                    id={`${category.toLowerCase()}-tab`}
-                    onClick={() => setActiveCategory(category)}
-                    className={`relative px-4 md:px-6 py-2 md:py-3 rounded-full transition-all duration-300 text-xs md:text-sm tracking-wide group hover:transform hover:-translate-y-0.5 ${
-                      activeCategory === category
-                        ? 'text-white shadow-lg shadow-brand-primary/20'
-                        : 'text-brand-dark hover:text-brand-primary'
-                    }`}
-                  >
-                    <span className={`absolute inset-0 rounded-full transition-all duration-300 ${
-                      activeCategory === category
-                        ? 'bg-gradient-to-r from-brand-primary to-brand-primary/90 opacity-100'
-                        : 'bg-white hover:bg-brand-primary/5 opacity-90 shadow-sm group-hover:shadow-md group-hover:scale-105'
-                    }`}></span>
-                    <span className="relative inline-flex items-center">
-                      {category}
-                      {!activeCategory === category && (
-                        <motion.span
-                          initial={{ width: 0 }}
-                          animate={{ width: "auto" }}
-                          className="ml-1 overflow-hidden"
-                        >
-                          →
-                        </motion.span>
-                      )}
-                    </span>
-                  </button>
-                ))}
-              </div>
             </motion.div>
 
             {/* Package Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
-              {filteredPackages.slice(0, 3).map((pkg, index) => (
-                <motion.div
-                  key={pkg.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ 
-                    opacity: 1, 
-                    y: 0,
-                    transition: {
-                      duration: 0.5,
-                      ease: "easeOut",
-                      delay: index * 0.2
-                    }
-                  }}
-                  viewport={{ 
-                    once: true,
-                    margin: "-100px"
-                  }}
-                  whileHover={{ 
-                    y: -8,
-                    transition: {
-                      duration: 0.2,
-                      ease: "easeOut"
-                    }
-                  }}
-                  className="bg-white rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 backdrop-blur-sm bg-white/90"
-                >
-                  <div className="p-6 md:p-10 flex flex-col items-center text-center">
-                    {/* Package Title */}
-                    <h3 className="text-xl md:text-3xl font-serif text-brand-dark mb-3 md:mb-4">{pkg.name}</h3>
-                    
-                    {/* Description */}
-                    <p className="text-sm md:text-base text-brand-muted mb-6 md:mb-10 line-clamp-2">{pkg.description}</p>
-
-                    {/* Features List */}
-                    <div className="space-y-3 md:space-y-4 mb-6 md:mb-10 w-full">
-                      {pkg.features.slice(0, 4).map((feature, idx) => (
-                        <motion.div
-                          key={idx}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: 0.1 + idx * 0.05 }}
-                          className="flex items-start group justify-center"
-                        >
-                          <div className="flex items-center space-x-2 md:space-x-3">
-                            <Check className="h-4 w-4 md:h-5 md:w-5 text-brand-primary group-hover:text-brand-dark transition-colors duration-200" />
-                            <span className="text-sm md:text-base text-gray-600 group-hover:text-brand-dark transition-colors duration-200">
-                              {feature}
-                            </span>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-
-                    {/* Learn More Button */}
-                    <Link
-                      to={`/packages/${pkg.id}`}
-                      onClick={() => window.scrollTo(0, 0)}
-                      className="inline-block border-2 border-brand-dark text-brand-dark px-6 md:px-8 py-2 md:py-3 rounded-full hover:bg-brand-dark hover:text-brand-beige transition-colors duration-300 text-sm md:text-base font-medium"
-                    >
-                      More Details
-                    </Link>
-                  </div>
-                </motion.div>
-              ))}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8">
+              {packages
+                .filter(pkg => pkg.category === 'Wedding')
+                .map((pkg, index) => (
+                  <PackageCard 
+                    key={pkg.id} 
+                    package={pkg} 
+                    onBook={() => navigate(`/packages/${pkg.id}`)} 
+                    index={index}
+                  />
+                ))}
             </div>
+
+            {/* CTA Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="text-center mt-20"
+            >
+              <Link
+                to="/packages"
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="inline-block border-2 border-brand-dark text-brand-dark px-10 py-4 rounded-full hover:bg-brand-dark hover:text-brand-beige transition-colors duration-300 font-medium text-lg"
+              >
+                Compare All Packages
+              </Link>
+            </motion.div>
           </div>
         </section>
       </Suspense>
@@ -671,15 +329,15 @@ export default function Home() {
         <section className="py-12 md:py-16 bg-[#F8F5F3]">
           <div className="container mx-auto px-4">
             <div className="max-w-2xl mx-auto text-center mb-8">
-              <h2 className="text-3xl md:text-4xl font-serif text-brand-dark mb-3">Featured Work</h2>
+              <h2 className="text-3xl md:text-4xl font-serif text-brand-dark mb-3">Featured Wedding Photos</h2>
               <p className="text-brand-muted text-base md:text-lg">
-                Explore a curated collection of my best photography work. Each image tells a unique story and captures precious moments in time.
+                Explore a curated collection of our most beautiful wedding photography moments that tell unique love stories.
               </p>
             </div>
 
             <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8">
               <div className="grid grid-cols-3 gap-8 mb-8">
-                {featuredWork.slice(0, 6).map((image, index) => (
+                {featuredWork.map((image, index) => (
                   <motion.div
                     key={image.title}
                     initial={{ opacity: 0, y: 20 }}
@@ -689,7 +347,7 @@ export default function Home() {
                     className="relative aspect-square group cursor-pointer rounded-xl overflow-hidden bg-white shadow-md"
                   >
                     <Link 
-                      to={`/gallery?category=${image.category.toLowerCase()}`}
+                      to="/gallery"
                       className="block w-full h-full"
                       onClick={() => window.scrollTo(0, 0)}
                     >
@@ -704,7 +362,7 @@ export default function Home() {
                             {image.title}
                           </h3>
                           <p className="text-xs md:text-sm text-white/80 truncate">
-                            {image.category}
+                            Wedding Photography
                           </p>
                         </div>
                       </div>
@@ -718,7 +376,7 @@ export default function Home() {
                   to="/gallery"
                   className="inline-flex items-center gap-2 px-6 py-3 bg-[#D9CFC4] text-gray-800 rounded-full text-sm font-medium hover:bg-[#D9CFC4]/90 transition-all duration-300 group"
                 >
-                  <span>View Full Gallery</span>
+                  <span>View Wedding Gallery</span>
                   <motion.span
                     animate={{ x: [0, 5, 0] }}
                     transition={{ repeat: Infinity, duration: 1.5 }}

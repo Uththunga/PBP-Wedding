@@ -7,7 +7,6 @@ describe('PackageCard', () => {
     id: '1',
     name: 'Test Package',
     description: 'Test description',
-    price: 100,
     features: ['Feature 1', 'Feature 2']
   };
 
@@ -18,7 +17,8 @@ describe('PackageCard', () => {
     
     expect(screen.getByText('Test Package')).toBeInTheDocument();
     expect(screen.getByText('Test description')).toBeInTheDocument();
-    expect(screen.getByText('$100')).toBeInTheDocument();
+    expect(screen.getByText('Feature 1')).toBeInTheDocument();
+    expect(screen.getByText('Feature 2')).toBeInTheDocument();
   });
 
   it('calls onBook when book button is clicked', () => {
@@ -26,7 +26,6 @@ describe('PackageCard', () => {
     
     const bookButton = screen.getByText(/book now/i);
     fireEvent.click(bookButton);
-    
     expect(mockOnBook).toHaveBeenCalledTimes(1);
   });
 });

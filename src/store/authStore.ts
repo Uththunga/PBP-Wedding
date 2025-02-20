@@ -20,15 +20,12 @@ export const useAuthStore = create<AuthStore>()(
       login: async (email: string, password: string) => {
         set({ isLoading: true });
         try {
-          // Admin credentials check
-          const isAdmin = email === 'admin@prauda.com' && password === 'admin123';
-          
           // TODO: Replace with actual API call
           const mockUser: User = {
             id: '1',
             email,
-            fullName: isAdmin ? 'Admin User' : email.split('@')[0],
-            role: isAdmin ? 'admin' : 'client'
+            fullName: email.split('@')[0],
+            role: 'client'
           };
           
           // Simulate API delay
@@ -57,13 +54,12 @@ export const useAuthStore = create<AuthStore>()(
         try {
           // TODO: Replace with actual API call
           const mockUser: User = {
-            id: Date.now().toString(),
+            id: '2',
             email,
             fullName,
             role: 'client'
           };
           
-          // Simulate API delay
           await new Promise(resolve => setTimeout(resolve, 1000));
           
           set({
@@ -80,7 +76,6 @@ export const useAuthStore = create<AuthStore>()(
       resetPassword: async (email: string) => {
         set({ isLoading: true });
         try {
-          // TODO: Replace with actual API call
           await new Promise(resolve => setTimeout(resolve, 1000));
           set({ isLoading: false });
         } catch (error) {
@@ -92,9 +87,7 @@ export const useAuthStore = create<AuthStore>()(
       updateProfile: async (userData: Partial<User>) => {
         set({ isLoading: true });
         try {
-          // TODO: Replace with actual API call
           await new Promise(resolve => setTimeout(resolve, 1000));
-          
           set(state => ({
             user: state.user ? { ...state.user, ...userData } : null,
             isLoading: false
@@ -106,8 +99,7 @@ export const useAuthStore = create<AuthStore>()(
       }
     }),
     {
-      name: 'auth-storage',
-      skipHydration: false,
+      name: 'auth-storage'
     }
   )
 );

@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, User, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { branding } from '../../config/branding';
 import { useAuthStore } from '../../store/authStore';
 import Logo from './Logo';
-import NavLinks from './NavLinks';
 import MobileMenu from './MobileMenu';
 import LoginModal from '../auth/LoginModal';
+import { scrollToTop } from '../../utils/scrollUtils';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -29,10 +28,6 @@ export default function Navbar() {
   useEffect(() => {
     setIsMenuOpen(false);
   }, [location]);
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
 
   const handleLogout = () => {
     logout();
@@ -113,7 +108,7 @@ export default function Navbar() {
                   >
                     <User className="w-5 h-5" />
                     <span className="text-sm font-medium hidden sm:inline">
-                      {user?.name}
+                      {user?.fullName}
                     </span>
                   </motion.div>
                   <motion.button

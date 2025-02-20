@@ -7,6 +7,7 @@ import { useAuthStore } from '../../store/authStore';
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSwitchToSignUp?: () => void;
 }
 
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {

@@ -1,14 +1,76 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { Calendar, MapPin, Phone, CheckCircle2, AlertCircle, Check } from 'lucide-react';
 import { useBookingStore } from '../store/bookingStore';
 import { useAuthStore } from '../store/authStore';
-import { motion } from 'framer-motion';
-import { Calendar, Clock, MapPin, Phone, Camera, CheckCircle2, InfoIcon } from 'lucide-react';
 import { scrollToTop } from '../utils/scrollUtils';
+import { validateBookingForm } from '../utils/validation-utils';
 import PageTransition from '../components/ui/PageTransition';
 import emailjs from '@emailjs/browser';
 import toast from '../utils/toast';
-import { Link } from 'react-router-dom';
+
+interface AdditionalService {
+  id: string;
+  name: string;
+  price: number;
+  description: string;
+}
+
+interface FormData {
+  clientName: string;
+  clientEmail: string;
+  packageId: string;
+  date: string;
+  phone: string;
+  location: string;
+  notes: string;
+  addons: string[];
+}
+
+interface FormError {
+  field: string;
+  message: string;
+}
+
+const additionalServices: Record<string, AdditionalService[]> = {
+  'wedding-luxury': [
+    { id: 'second-engagement', name: 'Second Engagement Session', price: 400, description: 'Additional engagement session at a different location.' },
+    { id: 'extra-album', name: 'Extra Premium Album', price: 500, description: 'Additional 40-page premium leather-bound album.' },
+    { id: 'video-highlight', name: 'Video Highlight Reel', price: 800, description: '5-minute cinematic highlight video of your special day.' },
+    { id: 'prints-collection', name: 'Luxury Print Collection', price: 300, description: 'Set of 20 premium prints in presentation box.' }
+  ],
+  'wedding-premium': [
+    { id: 'engagement', name: 'Extended Engagement Session', price: 300, description: '2-hour engagement session with multiple locations.' },
+    { id: 'album', name: 'Premium Photo Album', price: 400, description: 'Additional 30-page premium album.' },
+    { id: 'drone', name: 'Extended Drone Coverage', price: 300, description: 'Additional drone coverage time and locations.' },
+    { id: 'prints', name: 'Premium Prints Package', price: 250, description: 'Set of 15 premium prints.' }
+  ],
+  'wedding-classic': [
+    { id: 'engagement', name: 'Engagement Session', price: 250, description: '1.5-hour engagement session.' },
+    { id: 'album', name: 'Extra Photo Album', price: 300, description: 'Additional 25-page hardcover album.' },
+    { id: 'drone', name: 'Drone Coverage', price: 250, description: 'Aerial photography coverage.' },
+    { id: 'prints', name: 'Classic Print Package', price: 200, description: 'Set of 12 premium prints.' }
+  ],
+  'wedding-essential': [
+    { id: 'engagement', name: 'Mini Engagement Session', price: 200, description: '1-hour engagement session.' },
+    { id: 'album', name: 'Photo Album', price: 250, description: 'Additional 20-page photo album.' },
+    { id: 'extra-hours', name: 'Extra Coverage Hours', price: 200, description: '2 additional hours of photography coverage.' },
+    { id: 'prints', name: 'Essential Print Package', price: 150, description: 'Set of 10 prints.' }
+  ],
+  'wedding-intimate': [
+    { id: 'engagement', name: 'Mini Engagement Session', price: 150, description: '45-minute engagement session.' },
+    { id: 'album', name: 'Basic Photo Album', price: 200, description: 'Additional 15-page photo album.' },
+    { id: 'extra-hour', name: 'Extra Coverage Hour', price: 150, description: '1 additional hour of photography coverage.' },
+    { id: 'prints', name: 'Print Package', price: 100, description: 'Set of 8 prints.' }
+  ],
+  'wedding-micro': [
+    { id: 'mini-engagement', name: 'Mini Engagement Session', price: 100, description: '30-minute engagement session.' },
+    { id: 'album', name: 'Simple Photo Album', price: 150, description: '12-page photo album.' },
+    { id: 'extra-hour', name: 'Extra Coverage Hour', price: 150, description: '1 additional hour of photography coverage.' },
+    { id: 'prints', name: 'Basic Print Package', price: 75, description: 'Set of 5 prints.' }
+  ]
+};
 
 export default function Booking() {
   const location = useLocation();
@@ -16,41 +78,95 @@ export default function Booking() {
   const { packages, addBooking } = useBookingStore();
   const { user } = useAuthStore();
   
+  const [formData, setFormData] = useState<FormData>(() => {
+    const savedForm = localStorage.getItem('bookingFormData');
+    if (savedForm) {
+      const parsed = JSON.parse(savedForm);
+      if (Date.now() - parsed.timestamp < 24 * 60 * 60 * 1000) {
+        return parsed.data;
+      }
+    }
+    
+    return {
+      clientName: user?.fullName || '',
+      clientEmail: user?.email || '',
+      packageId: location.state?.packageId || new URLSearchParams(location.search).get('package') || packages[0]?.id || 'wedding-premium',
+      addons: location.state?.addons || [],
+      date: '',
+      phone: '',
+      location: '',
+      notes: ''
+    };
+  });
+
+  const [formErrors, setFormErrors] = useState<FormError[]>([]);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [showAddonChangeNotice, setShowAddonChangeNotice] = useState(false);
+  const [removedAddons, setRemovedAddons] = useState<string[]>([]);
+
+  // Save form data to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('bookingFormData', JSON.stringify({
+      data: formData,
+      timestamp: Date.now()
+    }));
+  }, [formData]);
+
+  // Track form changes
+  useEffect(() => {
+    const savedForm = localStorage.getItem('bookingFormData');
+    if (!savedForm) {
+      setHasChanges(false);
+      return;
+    }
+
+    const { data: savedData } = JSON.parse(savedForm);
+    const hasUnsavedChanges = Object.entries(formData).some(([key, value]) => {
+      if (key === 'addons') {
+        return JSON.stringify(value) !== JSON.stringify(savedData[key]);
+      }
+      return value !== savedData[key];
+    });
+    
+    setHasChanges(hasUnsavedChanges);
+  }, [formData]);
+
+  // Add beforeunload event listener
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasChanges) {
+        const message = "You have unsaved changes. Are you sure you want to leave?";
+        e.returnValue = message;
+        return message;
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasChanges]);
+
+  // Use useLocation and check for navigation changes
+  useEffect(() => {
+    if (hasChanges && location.pathname !== '/booking-confirmation') {
+      const shouldLeave = window.confirm("You have unsaved changes. Are you sure you want to leave?");
+      if (!shouldLeave) {
+        navigate(-1); // Go back if user doesn't want to leave
+      }
+    }
+  }, [location, hasChanges, navigate]);
+
   // Scroll to top when component mounts
-  React.useEffect(() => {
+  useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  // Get package ID from location state or URL params
-  const selectedPackageId = location.state?.packageId || new URLSearchParams(location.search).get('package') || packages[0]?.id || 'wedding-premium';
-  const selectedPackage = packages.find(pkg => pkg.id === selectedPackageId) || packages[0];
-
   // Initialize EmailJS once when component mounts
-  React.useEffect(() => {
-    emailjs.init("NliNJpGj4y_o-00NL");
+  useEffect(() => {
+    emailjs.init(import.meta.env.VITE_EMAILJS_PUBLIC_KEY);
   }, []);
 
-  const [formData, setFormData] = React.useState({
-    clientName: user?.fullName || '',
-    clientEmail: user?.email || '',
-    packageId: selectedPackageId, // Pre-populate with selected package
-    date: '',
-    startTime: {
-      hour: '',
-      minute: ''
-    },
-    endTime: {
-      hour: '',
-      minute: ''
-    },
-    phone: '',
-    location: '',
-    occasion: selectedPackage?.category || '', // Pre-populate with package category
-    notes: ''
-  });
-
   // Update form data when user changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (user) {
       setFormData(prev => ({
         ...prev,
@@ -60,60 +176,43 @@ export default function Booking() {
     }
   }, [user]);
 
-  const packagesByCategory = React.useMemo(() => {
-    return packages.reduce((acc, pkg) => {
-      if (!acc[pkg.category]) {
-        acc[pkg.category] = [];
-      }
-      acc[pkg.category].push(pkg);
-      return acc;
-    }, {} as Record<string, Package[]>);
-  }, [packages]);
-
-  const handleOccasionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newOccasion = e.target.value;
+  // Update form data when package selection changes from route
+  useEffect(() => {
     setFormData(prev => ({
       ...prev,
-      occasion: newOccasion,
-      packageId: packagesByCategory[newOccasion]?.[0]?.id || '' // Select first package of category by default
+      packageId: location.state?.packageId || new URLSearchParams(location.search).get('package') || packages[0]?.id || 'wedding-premium',
+      addons: location.state?.addons || []
     }));
-  };
+  }, [location.state?.packageId, location.state?.addons]);
 
-  const hours = Array.from({ length: 24 }, (_, i) => ({
-    value: i.toString().padStart(2, '0'),
-    label: i.toString().padStart(2, '0') + ':00'
-  }));
+  // Clear form errors when input changes
+  useEffect(() => {
+    setFormErrors([]);
+  }, [formData]);
 
-  const minutes = ['00', '15', '30', '45'].map(minute => ({
-    value: minute,
-    label: minute
-  }));
-
-  const handleTimeChange = (type: 'startTime' | 'endTime', field: 'hour' | 'minute', value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [type]: {
-        ...prev[type],
-        [field]: value
-      }
-    }));
-  };
-
-  const formatTime = (hour: string, minute: string) => {
-    return `${hour}:${minute}`;
-  };
-
+  // Clear localStorage after successful submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    const validation = validateBookingForm(formData);
+    if (!validation.isValid) {
+      setFormErrors(validation.errors.map(error => ({
+        ...error,
+        field: String(error.field)
+      })));
+      toast.error("Please fill in all required fields correctly");
+      return;
+    }
+    
     try {
+      const selectedPackage = packages.find(pkg => pkg.id === formData.packageId);
       const templateParams = {
         to_name: 'Prauda',
         from_name: formData.clientName,
         reply_to: formData.clientEmail,
         message: `
-📸 New Booking Request
-═══════════════════
+📸 New Wedding Booking Request
+═══════════════════════════
 
 👤 Client Details
 ───────────────
@@ -121,13 +220,16 @@ export default function Booking() {
 • Email: ${formData.clientEmail}
 • Phone: ${formData.phone}
 
-📅 Session Details
+📅 Wedding Details
 ───────────────
-• Package: ${packages.find(pkg => pkg.id === formData.packageId)?.name || ''}
+• Package: ${selectedPackage?.name || ''}
 • Date: ${formData.date}
-• Time: ${formatTime(formData.startTime.hour, formData.startTime.minute)} - ${formatTime(formData.endTime.hour, formData.endTime.minute)}
-• Location: ${formData.location}
-• Occasion: ${formData.occasion}
+• Venue/Location: ${formData.location}
+${formData.addons?.length ? `
+🎁 Additional Services
+───────────────
+${formData.addons.map(addon => `• ${addon}`).join('\n')}
+` : ''}
 
 📝 Additional Notes
 ───────────────
@@ -138,8 +240,8 @@ ${formData.notes || 'No additional notes provided'}
       console.log('Sending email with params:', templateParams);
 
       const response = await emailjs.send(
-        "service_1a81ztj",
-        "template_92mmywd",
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
         templateParams
       );
 
@@ -149,12 +251,17 @@ ${formData.notes || 'No additional notes provided'}
       const booking = {
         id: Date.now().toString(),
         ...formData,
-        status: 'pending' as const
+        status: 'pending' as const,
+        photos: [],
+        totalPhotos: 0,
+        selectedPhotos: 0,
+        printedPhotos: 0,
+        deliveredPhotos: 0
       };
       addBooking(booking);
       
       // Show success message
-      toast.success("Booking request sent successfully! We'll get back to you soon.");
+      toast.success("Wedding booking request sent successfully! We'll get back to you soon.");
       
       // Clear the form
       setFormData({
@@ -162,22 +269,18 @@ ${formData.notes || 'No additional notes provided'}
         clientEmail: user?.email || '',
         packageId: '',
         date: '',
-        startTime: {
-          hour: '',
-          minute: ''
-        },
-        endTime: {
-          hour: '',
-          minute: ''
-        },
         phone: '',
         location: '',
-        occasion: '',
-        notes: ''
+        notes: '',
+        addons: []
       });
       
+      // Clear saved form data after successful submission
+      localStorage.removeItem('bookingFormData');
+
       scrollToTop();
       navigate('/booking-confirmation');
+
     } catch (error) {
       console.error("Error sending email:", error);
       if (error instanceof Error) {
@@ -189,9 +292,105 @@ ${formData.notes || 'No additional notes provided'}
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    
+    // If package changes, validate addons
+    if (name === 'packageId') {
+      const availableAddons = additionalServices[value]?.map((s: AdditionalService) => s.id) || [];
+      const removedOnes = formData.addons.filter((addon: string) => !availableAddons.includes(addon));
+      
+      if (removedOnes.length > 0) {
+        setRemovedAddons(removedOnes.map((id: string) => {
+          const addon = getAddonDetails(id);
+          return addon?.name || id;
+        }));
+        setShowAddonChangeNotice(true);
+        setTimeout(() => setShowAddonChangeNotice(false), 5000);
+      }
+      
+      setFormData((prev: FormData) => ({
+        ...prev,
+        [name]: value,
+        addons: prev.addons.filter((addon: string) => availableAddons.includes(addon))
+      }));
+    } else {
+      setFormData((prev: FormData) => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+    
+    // Validate field on blur
+    if (e.type === 'blur') {
+      const validation = validateBookingForm({ 
+        ...formData, 
+        [name]: value 
+      });
+      const fieldError = validation.errors.find(error => String(error.field) === name);
+      if (fieldError) {
+        setFormErrors(prev => [...prev.filter(e => e.field !== name), {
+          ...fieldError,
+          field: String(fieldError.field)
+        }]);
+      }
+    }
+  };
+
+  const getFieldError = (fieldName: string) => {
+    return formErrors.find(error => error.field === fieldName)?.message;
+  };
+
+  const renderErrorMessage = (fieldName: string) => {
+    const error = getFieldError(fieldName);
+    if (!error) return null;
+    
+    return (
+      <div className="flex items-center space-x-1 mt-1 text-red-500 text-sm">
+        <AlertCircle className="w-4 h-4" />
+        <span>{error}</span>
+      </div>
+    );
+  };
+
+  // Add helper to get addon details including price
+  const getAddonDetails = (addonId: string) => {
+    if (!formData.packageId) return null;
+    const additionalServices = {
+      'wedding-premium': [
+        { id: 'engagement', name: 'Engagement Session', price: 250 },
+        { id: 'album', name: 'Premium Photo Album', price: 300 },
+        { id: 'drone', name: 'Drone Coverage', price: 200 },
+        { id: 'prints', name: 'Premium Prints Package', price: 150 }
+      ],
+      'wedding-essential': [
+        { id: 'engagement', name: 'Engagement Session', price: 200 },
+        { id: 'album', name: 'Photo Album', price: 200 },
+        { id: 'prints', name: 'Prints Package', price: 150 }
+      ]
+    };
+    
+    return additionalServices[formData.packageId as keyof typeof additionalServices]?.find(s => s.id === addonId) || null;
+  };
+
+  const calculateTotal = () => {
+    const basePrices: Record<string, number> = {
+      'wedding-premium': 2500,
+      'wedding-essential': 1500
+    };
+
+    const basePrice = basePrices[formData.packageId] || 0;
+    const addonsTotal = formData.addons?.reduce((total: number, addonId: string) => {
+      const addon = getAddonDetails(addonId);
+      return total + (addon?.price || 0);
+    }, 0) || 0;
+
+    return basePrice + addonsTotal;
+  };
+
+  const removeAddon = (addonId: string) => {
     setFormData(prev => ({
       ...prev,
-      [e.target.name]: e.target.value
+      addons: prev.addons.filter(id => id !== addonId)
     }));
   };
 
@@ -203,7 +402,7 @@ ${formData.notes || 'No additional notes provided'}
           <div className="absolute inset-0">
             <img
               src="https://images.pexels.com/photos/3379934/pexels-photo-3379934.jpeg?auto=compress&cs=tinysrgb&w=1920"
-              alt="Photography session"
+              alt="Wedding photography session"
               className="w-full h-full object-cover opacity-50"
             />
             <div className="absolute inset-0 bg-gradient-to-b from-transparent to-brand-dark/80" />
@@ -215,7 +414,7 @@ ${formData.notes || 'No additional notes provided'}
                 animate={{ opacity: 1, y: 0 }}
                 className="text-4xl md:text-5xl lg:text-6xl font-serif text-white mb-4"
               >
-                Book Your Session
+                Book Your Wedding Session
               </motion.h1>
               <motion.p 
                 initial={{ opacity: 0, y: 20 }}
@@ -223,7 +422,7 @@ ${formData.notes || 'No additional notes provided'}
                 transition={{ delay: 0.2 }}
                 className="text-lg text-brand-beige max-w-2xl mx-auto"
               >
-                Let's create timeless memories together
+                Let's capture the magic of your special day together
               </motion.p>
             </div>
           </div>
@@ -248,70 +447,101 @@ ${formData.notes || 'No additional notes provided'}
 
             <form onSubmit={handleSubmit} className="space-y-8 relative">
               {/* Package Selection */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                  <label htmlFor="occasion" className="block text-sm font-medium text-brand-dark mb-2 ml-1">
-                    Type of Session
-                  </label>
+              <div>
+                <label htmlFor="packageId" className="block text-sm font-medium text-brand-dark mb-2 ml-1">
+                  Select Wedding Package
+                </label>
+                <div className="space-y-2">
                   <div className="relative group">
-                    <Camera className="absolute left-4 top-1/2 transform -translate-y-1/2 text-brand-muted group-focus-within:text-brand-beige transition-colors h-5 w-5" />
+                    <CheckCircle2 className="absolute left-4 top-1/2 transform -translate-y-1/2 text-brand-muted group-focus-within:text-brand-beige transition-colors h-5 w-5" />
                     <select
-                      id="occasion"
-                      name="occasion"
-                      value={formData.occasion}
-                      onChange={handleOccasionChange}
+                      id="packageId"
+                      name="packageId"
+                      value={formData.packageId}
+                      onChange={handleChange}
                       className="w-full pl-12 pr-4 py-3 rounded-2xl border border-brand-beige/50 focus:border-brand-beige focus:ring-2 focus:ring-brand-beige/20 bg-white/50 backdrop-blur-sm transition-all"
                       required
                     >
-                      <option value="">Select session type</option>
-                      <option value="Wedding">Wedding Photography</option>
-                      <option value="Fashion">Fashion & Editorial</option>
-                      <option value="Family">Family Portrait</option>
-                      <option value="Portrait">Professional Portrait</option>
-                      <option value="Commercial">Commercial Photography</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label htmlFor="packageId" className="block text-sm font-medium text-brand-dark mb-2 ml-1">
-                    Select Package
-                  </label>
-                  <div className="space-y-2">
-                    <div className="relative group">
-                      <CheckCircle2 className="absolute left-4 top-1/2 transform -translate-y-1/2 text-brand-muted group-focus-within:text-brand-beige transition-colors h-5 w-5" />
-                      <select
-                        id="packageId"
-                        name="packageId"
-                        value={formData.packageId}
-                        onChange={handleChange}
-                        className="w-full pl-12 pr-4 py-3 rounded-2xl border border-brand-beige/50 focus:border-brand-beige focus:ring-2 focus:ring-brand-beige/20 bg-white/50 backdrop-blur-sm transition-all"
-                        required
-                        disabled={!formData.occasion}
-                      >
-                        <option value="">
-                          {formData.occasion ? 'Select a package' : 'First select session type'}
-                        </option>
-                        {formData.occasion && packagesByCategory[formData.occasion]?.map(pkg => (
+                      <option value="">Select a wedding package</option>
+                      {packages
+                        .filter(pkg => pkg.category === 'Wedding')
+                        .map(pkg => (
                           <option key={pkg.id} value={pkg.id}>
                             {pkg.name}
                           </option>
                         ))}
-                      </select>
-                    </div>
-                    {formData.packageId && (
-                      <Link
-                        to={`/packages/${formData.packageId}`}
-                        target="_blank"
-                        className="text-sm text-brand-beige hover:text-brand-muted transition-colors flex items-center gap-1 ml-1"
-                      >
-                        <InfoIcon className="w-4 h-4" />
-                        View selected package details
-                      </Link>
-                    )}
+                    </select>
                   </div>
+                  
+                  {/* Addon Change Notice */}
+                  {showAddonChangeNotice && removedAddons.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-lg p-3 mt-2"
+                    >
+                      <p>
+                        Some selected services are not available in this package:
+                        <span className="font-medium block mt-1">
+                          {removedAddons.join(', ')}
+                        </span>
+                      </p>
+                    </motion.div>
+                  )}
                 </div>
               </div>
+
+              {/* Selected Addons and Total */}
+              {formData.addons?.length > 0 && (
+                <div className="mt-4 space-y-4">
+                  <div>
+                    <p className="text-sm text-brand-muted mb-2">Selected Additional Services:</p>
+                    <div className="space-y-2">
+                      {formData.addons.map(addon => {
+                        const addonDetails = getAddonDetails(addon);
+                        return (
+                          <div 
+                            key={addon} 
+                            className="flex items-center justify-between text-sm text-brand-dark bg-brand-beige/10 px-3 py-2 rounded-lg group"
+                          >
+                            <div className="flex items-center">
+                              <Check className="w-4 h-4 mr-2 text-brand-beige" />
+                              <span>{addonDetails?.name || addon}</span>
+                            </div>
+                            <div className="flex items-center space-x-4">
+                              {user && (
+                                <span className="text-brand-primary font-medium">
+                                  ${addonDetails?.price || 0}
+                                </span>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => removeAddon(addon)}
+                                className="text-brand-muted hover:text-red-500 transition-colors p-1 opacity-0 group-hover:opacity-100"
+                                aria-label="Remove addon"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="M18 6L6 18M6 6l12 12"/>
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {user && (
+                    <div className="flex justify-between items-center pt-4 border-t border-brand-beige/30">
+                      <span className="text-sm font-medium text-brand-dark">Total Package Price:</span>
+                      <span className="text-lg font-serif text-brand-primary">
+                        ${calculateTotal()}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Personal Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -326,8 +556,14 @@ ${formData.notes || 'No additional notes provided'}
                     required
                     value={formData.clientName}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-2xl border border-brand-beige/50 focus:border-brand-beige focus:ring-2 focus:ring-brand-beige/20 bg-white/50 backdrop-blur-sm transition-all"
+                    onBlur={handleChange}
+                    className={`w-full px-4 py-3 rounded-2xl border ${
+                      getFieldError('clientName') 
+                        ? 'border-red-400 focus:border-red-500 focus:ring-red-200' 
+                        : 'border-brand-beige/50 focus:border-brand-beige focus:ring-brand-beige/20'
+                    } bg-white/50 backdrop-blur-sm transition-all`}
                   />
+                  {renderErrorMessage('clientName')}
                 </div>
 
                 <div>
@@ -341,8 +577,14 @@ ${formData.notes || 'No additional notes provided'}
                     required
                     value={formData.clientEmail}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 rounded-2xl border border-brand-beige/50 focus:border-brand-beige focus:ring-2 focus:ring-brand-beige/20 bg-white/50 backdrop-blur-sm transition-all"
+                    onBlur={handleChange}
+                    className={`w-full px-4 py-3 rounded-2xl border ${
+                      getFieldError('clientEmail') 
+                        ? 'border-red-400 focus:border-red-500 focus:ring-red-200' 
+                        : 'border-brand-beige/50 focus:border-brand-beige focus:ring-brand-beige/20'
+                    } bg-white/50 backdrop-blur-sm transition-all`}
                   />
+                  {renderErrorMessage('clientEmail')}
                 </div>
               </div>
 
@@ -360,123 +602,67 @@ ${formData.notes || 'No additional notes provided'}
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
-                      className="w-full pl-12 pr-4 py-3 rounded-2xl border border-brand-beige/50 focus:border-brand-beige focus:ring-2 focus:ring-brand-beige/20 bg-white/50 backdrop-blur-sm transition-all"
+                      onBlur={handleChange}
+                      className={`w-full pl-12 pr-4 py-3 rounded-2xl border ${
+                        getFieldError('phone') 
+                          ? 'border-red-400 focus:border-red-500 focus:ring-red-200' 
+                          : 'border-brand-beige/50 focus:border-brand-beige focus:ring-brand-beige/20'
+                      } bg-white/50 backdrop-blur-sm transition-all`}
                       required
                     />
+                    {renderErrorMessage('phone')}
                   </div>
                 </div>
 
                 <div>
                   <label htmlFor="location" className="block text-sm font-medium text-brand-dark mb-2 ml-1">
-                    Preferred Location
+                    Wedding Venue
                   </label>
                   <div className="relative group">
                     <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 text-brand-muted group-focus-within:text-brand-beige transition-colors h-5 w-5" />
-                    <select
+                    <input
+                      type="text"
                       id="location"
                       name="location"
                       value={formData.location}
                       onChange={handleChange}
-                      className="w-full pl-12 pr-4 py-3 rounded-2xl border border-brand-beige/50 focus:border-brand-beige focus:ring-2 focus:ring-brand-beige/20 bg-white/50 backdrop-blur-sm transition-all"
+                      onBlur={handleChange}
+                      placeholder="Enter wedding venue or location"
+                      className={`w-full pl-12 pr-4 py-3 rounded-2xl border ${
+                        getFieldError('location') 
+                          ? 'border-red-400 focus:border-red-500 focus:ring-red-200' 
+                          : 'border-brand-beige/50 focus:border-brand-beige focus:ring-brand-beige/20'
+                      } bg-white/50 backdrop-blur-sm transition-all`}
                       required
-                    >
-                      <option value="">Select location</option>
-                      <option value="Studio">Our Studio</option>
-                      <option value="Outdoor">Outdoor Location</option>
-                      <option value="Client Location">Your Location</option>
-                      <option value="Venue">Event Venue</option>
-                    </select>
+                    />
+                    {renderErrorMessage('location')}
                   </div>
                 </div>
               </div>
 
-              {/* Date and Time */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div>
-                  <label htmlFor="date" className="block text-sm font-medium text-brand-dark mb-2 ml-1">
-                    Preferred Date
-                  </label>
-                  <div className="relative group">
-                    <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 text-brand-muted group-focus-within:text-brand-beige transition-colors h-5 w-5" />
-                    <input
-                      type="date"
-                      id="date"
-                      name="date"
-                      required
-                      value={formData.date}
-                      onChange={handleChange}
-                      min={new Date().toISOString().split('T')[0]}
-                      className="w-full pl-12 pr-4 py-3 rounded-2xl border border-brand-beige/50 focus:border-brand-beige focus:ring-2 focus:ring-brand-beige/20 bg-white/50 backdrop-blur-sm transition-all"
-                    />
-                  </div>
-                </div>
-
-                <div className="mb-6">
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
-                    Start Time <span className="text-red-500">*</span>
-                  </label>
-                  <div className="flex gap-2">
-                    <select
-                      className="w-24 bg-white border border-gray-300 text-gray-700 py-2 px-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
-                      value={formData.startTime.hour}
-                      onChange={(e) => handleTimeChange('startTime', 'hour', e.target.value)}
-                      required
-                    >
-                      <option value="">Hour</option>
-                      {hours.map(({ value, label }) => (
-                        <option key={value} value={value}>
-                          {label}
-                        </option>
-                      ))}
-                    </select>
-                    <select
-                      className="w-24 bg-white border border-gray-300 text-gray-700 py-2 px-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
-                      value={formData.startTime.minute}
-                      onChange={(e) => handleTimeChange('startTime', 'minute', e.target.value)}
-                      required
-                    >
-                      <option value="">Minute</option>
-                      {minutes.map(({ value, label }) => (
-                        <option key={value} value={value}>
-                          {label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="mb-6">
-                  <label className="block text-gray-700 text-sm font-medium mb-2">
-                    End Time <span className="text-red-500">*</span>
-                  </label>
-                  <div className="flex gap-2">
-                    <select
-                      className="w-24 bg-white border border-gray-300 text-gray-700 py-2 px-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
-                      value={formData.endTime.hour}
-                      onChange={(e) => handleTimeChange('endTime', 'hour', e.target.value)}
-                      required
-                    >
-                      <option value="">Hour</option>
-                      {hours.map(({ value, label }) => (
-                        <option key={value} value={value}>
-                          {label}
-                        </option>
-                      ))}
-                    </select>
-                    <select
-                      className="w-24 bg-white border border-gray-300 text-gray-700 py-2 px-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
-                      value={formData.endTime.minute}
-                      onChange={(e) => handleTimeChange('endTime', 'minute', e.target.value)}
-                      required
-                    >
-                      <option value="">Minute</option>
-                      {minutes.map(({ value, label }) => (
-                        <option key={value} value={value}>
-                          {label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+              {/* Date */}
+              <div>
+                <label htmlFor="date" className="block text-sm font-medium text-brand-dark mb-2 ml-1">
+                  Wedding Date
+                </label>
+                <div className="relative group">
+                  <Calendar className="absolute left-4 top-1/2 transform -translate-y-1/2 text-brand-muted group-focus-within:text-brand-beige transition-colors h-5 w-5" />
+                  <input
+                    type="date"
+                    id="date"
+                    name="date"
+                    required
+                    value={formData.date}
+                    onChange={handleChange}
+                    onBlur={handleChange}
+                    min={new Date().toISOString().split('T')[0]}
+                    className={`w-full pl-12 pr-4 py-3 rounded-2xl border ${
+                      getFieldError('date') 
+                        ? 'border-red-400 focus:border-red-500 focus:ring-red-200' 
+                        : 'border-brand-beige/50 focus:border-brand-beige focus:ring-brand-beige/20'
+                    } bg-white/50 backdrop-blur-sm transition-all`}
+                  />
+                  {renderErrorMessage('date')}
                 </div>
               </div>
 
@@ -491,9 +677,15 @@ ${formData.notes || 'No additional notes provided'}
                   rows={4}
                   value={formData.notes}
                   onChange={handleChange}
-                  placeholder="Tell us about your vision for the photoshoot, any specific requirements, or questions you may have..."
-                  className="w-full px-4 py-3 rounded-2xl border border-brand-beige/50 focus:border-brand-beige focus:ring-2 focus:ring-brand-beige/20 bg-white/50 backdrop-blur-sm transition-all"
+                  onBlur={handleChange}
+                  placeholder="Tell us about your wedding vision, any specific photo requirements, or questions you may have..."
+                  className={`w-full px-4 py-3 rounded-2xl border ${
+                    getFieldError('notes') 
+                      ? 'border-red-400 focus:border-red-500 focus:ring-red-200' 
+                      : 'border-brand-beige/50 focus:border-brand-beige focus:ring-brand-beige/20'
+                  } bg-white/50 backdrop-blur-sm transition-all`}
                 />
+                {renderErrorMessage('notes')}
               </div>
 
               {/* Submit Button */}
@@ -505,10 +697,11 @@ ${formData.notes || 'No additional notes provided'}
                   className="w-full md:w-64 px-8 py-4 bg-brand-beige text-white rounded-full font-medium hover:bg-brand-muted transition-all duration-300 relative overflow-hidden group shadow-lg shadow-brand-beige/20"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-brand-muted to-brand-beige opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <span className="relative">Book a Session</span>
+                  <span className="relative">Book Wedding Session</span>
                 </motion.button>
+
                 <p className="mt-4 text-sm text-brand-muted text-center">
-                  We'll get back to you within 24 hours to confirm your booking details.
+                  We'll get back to you within 24 hours to confirm your wedding photography booking details.
                 </p>
               </div>
             </form>
